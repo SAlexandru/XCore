@@ -1,2 +1,2 @@
-# Corex
-Utility tool for meta-meta programming and metrics development
+# XCore
+Support for Software Analysis Tool Development
