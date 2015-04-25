@@ -1,0 +1,91 @@
+package com.salexandru.codeGeneration;
+
+import java.util.List;
+
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+
+import com.salexandru.corex.interfaces.IPropertyComputer;
+
+public class XComputer {
+	private TypeElement  computer_;
+	private TypeMirror   entityType_;
+	private TypeMirror   returnType_;
+	private Elements     utils_;
+
+	public XComputer(TypeElement computer, DeclaredType returnType) {
+		if (null == computer || null == returnType) {
+			throw new NullPointerException();
+		}
+		computer_ = computer;
+		returnType_ = returnType;
+	}
+	
+	public XComputer(TypeElement computer, Elements utils) {
+		this(computer);
+		utils_ = utils;
+	}
+
+	public XComputer(TypeElement computer) {
+		if (null == computer) {
+			throw new NullPointerException("Invalid (Null) computer!");
+		}
+		
+		for (TypeMirror tIntf: computer.getInterfaces()) {
+			DeclaredType dTIntf = (DeclaredType)tIntf;
+			if (!dTIntf.asElement().getSimpleName().toString().equals(IPropertyComputer.class.getSimpleName())) {
+				continue;
+			}
+			List<? extends TypeMirror> typeArgs = dTIntf.getTypeArguments();
+			
+			if (2 != typeArgs.size()) {
+				throw new IllegalArgumentException("Illegal number of argument passed to IPropertyComputer");
+			}
+			for (TypeMirror t: typeArgs) {
+				if (TypeKind.WILDCARD == t.getKind()) {
+					throw new IllegalArgumentException("Wildcard types are not allowed (e.g ? extends T)");
+				}
+			}
+			returnType_ = typeArgs.get(0);
+			entityType_ = typeArgs.get(1);
+		}
+		computer_ = computer;
+	}
+	
+	public void  setElementUtils(Elements utils) {utils_ = utils;}
+	public Elements  getElementUtils() {return utils_;}
+
+	public TypeElement getComputer()   {return computer_;}
+	public TypeMirror  getReturnType() {return returnType_;}
+	public TypeMirror  getEntityType() {return entityType_;}
+	
+	public String getName() {return getComputer().getSimpleName().toString();}
+	public String getCamelCaseName() {return toCamelCase(getName());}
+	
+	private String toCamelCase(String name) {
+		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	}
+
+	public String generateSignature() {
+		StringBuilder doc = new StringBuilder();
+		if (null != utils_) {
+			doc = new StringBuilder("/**\n");
+			doc.append(utils_.getDocComment(getComputer()));
+			doc.append("\n*/\n");
+		}
+		
+		return doc + "public " + returnType_ + " " + getCamelCaseName() + "();\n";
+	}
+	
+	public String generateImpl(String instanceName) {
+		StringBuilder impl = new StringBuilder();
+		impl.append("public " + returnType_ + " " + getCamelCaseName() + "() {\n");
+		impl.append("    return " + instanceName + ".compute(this);\n");
+		impl.append("}\n");
+		return impl.toString();
+	}
+
+}

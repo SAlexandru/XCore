@@ -1,0 +1,42 @@
+package xmetamodel.implementation;
+
+import xmetamodel.*;
+import com.salexandru.corex.interfaces.Group;
+import xcorexview.metrics.projects.Name;
+import xcorexview.metrics.Groups.ListProjectPackages;
+
+
+public class XProjectImpl implements XProject {
+    private org.eclipse.jdt.core.IJavaProject underlyingObj_;
+
+    private static final Name Name_INSTANCE = new Name();
+    public static final ListProjectPackages ListProjectPackages_INSTANCE = new ListProjectPackages();
+
+
+    public XProjectImpl(org.eclipse.jdt.core.IJavaProject underlyingObj) {
+        underlyingObj_ = underlyingObj;
+        ListProjectPackages_INSTANCE.buildGroup(this);
+    }
+    @Override
+    public org.eclipse.jdt.core.IJavaProject getUnderlyingObject() {
+        return underlyingObj_;
+    }
+@Override
+public java.lang.String name() {
+    return Name_INSTANCE.compute(this);
+}
+@Override
+public Group<XPackage> listProjectPackages() {
+    return ListProjectPackages_INSTANCE.getGroup();
+}
+    public boolean equals(Object obj) {
+        if (null == obj || !(obj instanceof XProjectImpl)) {
+           return false;
+        }
+        XProjectImpl iObj = (XProjectImpl)obj;
+        if (null == underlyingObj_ || null == iObj.getUnderlyingObject()) {
+           return true;
+        }
+        return underlyingObj_.equals(iObj);
+    }
+}

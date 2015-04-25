@@ -1,0 +1,85 @@
+package com.salexandru.codeGeneration;
+
+import com.salexandru.corex.interfaces.Group;
+import com.salexandru.corex.interfaces.XEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+
+public class XPropertyComputer {
+	private TypeMirror propertie_;
+	private List<TypeElement> computers_;
+	private List<XGroupBuilder> groupBuilders_;
+	private Elements utils_;
+	
+	public final static String PREFIX = "X";
+	public final static String PACKAGE = "xmetamodel";
+	
+	public XPropertyComputer(TypeMirror propertie) {
+		if (null == propertie) {
+			throw new NullPointerException();
+		}
+		propertie_ = propertie;
+		computers_ = new ArrayList<>();
+		groupBuilders_ = new ArrayList<>();
+	}
+	
+	public String getName() {
+		return getSimpleName(propertie_.toString());
+	}
+	
+	public String getQualifiedName() {
+		return PACKAGE + '.' + getName();
+	}
+	
+	public void addComputer (TypeElement pc) {
+		computers_.add(pc);
+	}
+	
+	public void addGroupBuilder (XGroupBuilder gb) {
+		groupBuilders_.add(gb);
+	}
+	
+	public XPropertyComputer setElementsUtil(Elements util) {
+		utils_ = util;
+		return this;
+	}
+	
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("package " + PACKAGE + ";\n");
+		s.append("import " + XEntity.class.getCanonicalName() + ";\n");
+		s.append("import " + Group.class.getCanonicalName() + ";\n\n");
+		
+		s.append("public interface " + getName() + " extends XEntity {\n");
+		for (TypeElement elem: computers_) {
+			if (null != utils_) {
+				String doc = utils_.getDocComment(elem);
+				s.append(null == doc ? "": "/**\n" + doc + "*/\n");
+			}
+			s.append("    double " + javaNameConvertion(elem.getSimpleName()) + "();\n");
+		}
+		
+		for (XGroupBuilder gb: groupBuilders_) {
+			if (null != utils_) {
+				String doc = utils_.getDocComment(gb.getBuilder());
+				s.append(null == doc ? "": "/**\n" + doc + "*/\n");
+			}
+			s.append("    " + gb + "\n");
+		}
+		s.append("\tObject getUnderlyingObject();\n");
+		s.append("}\n");
+		
+		return s.toString();
+	}
+	
+	private String javaNameConvertion(Name name) {
+		return Character.toLowerCase(name.charAt(0)) + name.toString().substring(1);
+	}
+	private String getSimpleName(String name) {return name.substring(name.lastIndexOf('.') + 1);}
+}

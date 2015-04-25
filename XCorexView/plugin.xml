@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="xcorexview.view.CorexTableView"
+            id="com.salexandru.xcorexview.view.CorexTreeView"
+            name="CorexTreeView"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="com.salexandru.xcorexview.view.BrowseEntity"
+            objectClass="org.eclipse.jdt.core.IJavaElement">
+         <action
+               class="xcorexview.view.BrowseEntityAction"
+               id="com.salexandru.xcorexview.view.BrowseEntityAction"
+               label="Browse in XCorex"
+               menubarPath="addition">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>

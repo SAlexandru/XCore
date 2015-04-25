@@ -1,0 +1,151 @@
+package com.salexandru.codeGeneration;
+
+import com.salexandru.corex.interfaces.Group;
+import com.salexandru.corex.interfaces.XEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+
+public class XPropertyComputer {
+	private TypeMirror propertie_;
+	private List<TypeElement> computers_;
+	private List<XGroupBuilder> groupBuilders_;
+	private Elements utils_;
+	
+	public final static String PREFIX = "X";
+	public final static String PACKAGE = "xmetamodel";
+	public final static String PACKAGE_IMPL = "xmetamodel.implementation";
+	
+	public XPropertyComputer(TypeMirror propertie) {
+		if (null == propertie) {
+			throw new NullPointerException();
+		}
+		propertie_ = propertie;
+		computers_ = new ArrayList<>();
+		groupBuilders_ = new ArrayList<>();
+	}
+	
+	public String getName() {
+		return getSimpleName(propertie_.toString());
+	}
+	
+	public String getNameImpl() {
+		return getName() + "Impl";
+	}
+	
+	public String getQualifiedName() {
+		return PACKAGE + '.' + getName();
+	}
+	
+	public String getQualifiedNameImpl() {
+		return PACKAGE_IMPL + '.' + getNameImpl();
+	}
+	
+	public void addComputer (TypeElement pc) {
+		computers_.add(pc);
+	}
+	
+	public void addGroupBuilder (XGroupBuilder gb) {
+		groupBuilders_.add(gb);
+	}
+	
+	public XPropertyComputer setElementsUtil(Elements util) {
+		utils_ = util;
+		return this;
+	}
+	
+	public String generateImpl() {
+		StringBuilder s = new StringBuilder();
+		s.append("package " + PACKAGE_IMPL + ";\n");
+		
+		s.append("import xmetamodel.*;\n");
+		for (TypeElement elem: computers_) {
+			s.append ("import " + elem.getQualifiedName() + ";\n");
+		}
+		s.append("\n\n");
+		s.append("public class " + getNameImpl() + " implements " + getName() + " {");
+		s.append("    private Object underlyingObj_;\n\n");
+		for (TypeElement elem: computers_) {
+			s.append(String.format("    public static final %1$s %1$s_INSTANCE = new %1$s();\n", elem.getSimpleName()));
+		}
+		for (XGroupBuilder gb: groupBuilders_) {
+			s.append(String.format("    public static final %1$s %1s_INSTANCE _ new %1$s();\n" + gb.getName()));
+			
+		}
+		s.append("\n\n");
+		s.append("    public " + getNameImpl() + "(Object underlyingObj) {\n");
+		s.append("        underlyingObj_ = underlyingObj;\n");
+		s.append("    }\n");
+		s.append("    @Override\n");
+		s.append("    public Object getUnderlyingObj() {\n");
+		s.append("        return underlyingObj_;\n");
+		s.append("    }\n");
+		for (TypeElement elem: computers_) {
+			s.append("    @Override\n");
+			s.append("    public double " + javaNameConvertion(elem.getSimpleName()) + "() {\n" );
+			s.append("        return " + elem.getSimpleName() + "_INSTANCE.compute(this);\n");
+			s.append("    }");
+		}
+		for (XGroupBuilder gb: groupBuilders_) {
+			s.append("    @Override\n");
+			s.append("    " + gb.toString().replace(';', '{') + "\n" );
+			s.append("        return " + gb.getName() + "_INSTANCE.buildGroup(this);\n");
+			s.append("    }\n");
+		}
+		/*
+		 * hopefully this works 
+		 */
+		s.append("    public void equals(Object obj) {\n");
+		s.append("        if (null == obj || !(obj instanceof " + getNameImpl() + ")) {\n");
+		s.append("           return false;\n");
+		s.append("        }\n");
+		s.append("        " + getNameImpl() + " iObj = (" + getNameImpl() + ")obj\n");
+		s.append("        if (null == underlyingObj_ || null == iObj.getUnderlyingObj()) {\n");
+		s.append("           return true;\n");
+		s.append("        }\n");
+		s.append("        return underlyingObj_.equals(iObj);\n");
+		s.append("        }\n");
+		s.append("    }\n");
+		s.append("}\n");
+		
+		return s.toString();
+	}
+	
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("package " + PACKAGE + ";\n");
+		s.append("import " + XEntity.class.getCanonicalName() + ";\n");
+		s.append("import " + Group.class.getCanonicalName() + ";\n\n");
+		
+		s.append("public interface " + getName() + " extends XEntity {\n");
+		for (TypeElement elem: computers_) {
+			if (null != utils_) {
+				String doc = utils_.getDocComment(elem);
+				s.append(null == doc ? "": "/**\n" + doc + "*/\n");
+			}
+			s.append("    double " + javaNameConvertion(elem.getSimpleName()) + "();\n");
+		}
+		
+		for (XGroupBuilder gb: groupBuilders_) {
+			if (null != utils_) {
+				String doc = utils_.getDocComment(gb.getBuilder());
+				s.append(null == doc ? "": "/**\n" + doc + "*/\n");
+			}
+			s.append("    " + gb + "\n");
+		}
+		s.append("    Object getUnderlyingObject();\n");
+		s.append("}\n");
+		
+		return s.toString();
+	}
+	
+	private String javaNameConvertion(Name name) {
+		return Character.toLowerCase(name.charAt(0)) + name.toString().substring(1);
+	}
+	private String getSimpleName(String name) {return name.substring(name.lastIndexOf('.') + 1);}
+}

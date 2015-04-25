@@ -1,0 +1,5 @@
+package com.salexandru.corex.interfaces;
+
+public interface IPropertyComputer <K extends XEntity> {
+	double compute(K entity);
+}

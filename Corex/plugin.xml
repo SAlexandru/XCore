@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+	   point="org.eclipse.jdt.apt.core.annotationProcessorFactory" >
+		<java6processors enableDefault="true">
+			<java6processor class="com.salexandru.corex.annotationProcessor.XAnnotationProcessor"/>
+		</java6processors>
+	</extension>
+ <extension
+       point="org.eclipse.ui.propertyPages">
+    <page
+          class="com.salexandru.corex.preferencepage.CorexPropertyPage"
+          id="Corex.page1"
+          name="Corex"
+          objectClass="org.eclipse.jdt.core.IJavaProject">
+    </page>
+ </extension>
+ <extension
+       point="org.eclipse.ui.views">
+    <view
+          category="org.eclipse.jdt.ui.java"
+          class="com.salexandru.corex.view.CorexView"
+          icon="download.jpeg"
+          id="CorexView"
+          name="Corex"
+          restorable="true">
+    </view>
+ </extension>
+ <extension
+       point="org.eclipse.jdt.core.classpathContainerInitializer">
+    <classpathContainerInitializer
+          class="com.salexandru.corex.plugin.CorexLibraryAdder"
+          id="com.salexandru.corex.plugin.CorexLibraryAdder">
+    </classpathContainerInitializer>
+ </extension>
+</plugin>

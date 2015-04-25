@@ -1,0 +1,146 @@
+package com.salexandru.corex.annotationProcessor;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic.Kind;
+
+import com.salexandru.codeGeneration.XPropertyComputer;
+import com.salexandru.codeGeneration.XPropertyGenarator;
+import com.salexandru.corex.interfaces.IGroupBuilder;
+import com.salexandru.corex.interfaces.IPropertyComputer;
+import com.salexandru.corex.metaAnnotation.GroupBuilder;
+import com.salexandru.corex.metaAnnotation.PropertyComputer;
+
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
+public class XAnnotationProcessor extends AbstractProcessor {
+	private Set<String> supportedAnnotations_;
+	private XPropertyGenarator xProperties_;
+	
+	public XAnnotationProcessor() {
+		super();
+		xProperties_ = new XPropertyGenarator();
+		supportedAnnotations_ = new HashSet<>();
+		supportedAnnotations_.add(PropertyComputer.class.getCanonicalName());
+		supportedAnnotations_.add(GroupBuilder.class.getCanonicalName());
+	}
+	
+	@Override
+	public Set<String> getSupportedAnnotationTypes() {
+		return supportedAnnotations_;
+	}
+	
+	public void printNotice(String msg) {
+		processingEnv.getMessager().printMessage(Kind.NOTE, msg);
+	}
+	
+	public void printNotice(Element e, String msg) {
+		processingEnv.getMessager().printMessage(Kind.NOTE, msg, e);
+	}
+	
+	public void printWarning (Element e, String msg) {
+		processingEnv.getMessager().printMessage(Kind.WARNING, msg, e);
+	}
+	
+	public void printError(Element e, String msg) {
+		processingEnv.getMessager().printMessage(Kind.ERROR, msg, e);
+	}
+	
+	public void printError(String msg) {
+		processingEnv.getMessager().printMessage(Kind.ERROR, msg);
+	}
+	
+	@Override
+	public boolean process(Set<? extends TypeElement> annotations,
+			RoundEnvironment roundEnv) {
+		processPropertyComputer(roundEnv);
+		processGroupBuilder(roundEnv);
+		
+		try {
+			xProperties_.generate(processingEnv.getFiler());
+		}
+		catch (IOException e) {
+			printError (e.getMessage());
+		}
+		
+		return true;
+	}
+	
+	private void processPropertyComputer(RoundEnvironment env) {
+		TypeElement xIntf = processingEnv.getElementUtils().getTypeElement(IPropertyComputer.class.getCanonicalName());
+		for (Element elem: env.getElementsAnnotatedWith(PropertyComputer.class)) {
+			if (ElementKind.CLASS != elem.getKind()) {
+				printError (elem, "@PropertyComputer must annotate classes!");
+			}
+			else {
+				TypeElement tElem = (TypeElement)elem;
+				DeclaredType propIntf = null;
+				
+				for (TypeMirror intf: tElem.getInterfaces()) {
+					DeclaredType dIntf = (DeclaredType)intf;
+					
+					if (dIntf.asElement().getSimpleName().equals(xIntf.getSimpleName())) {
+						propIntf = dIntf;
+						break;
+					}
+				}
+				
+				if (null == propIntf) {
+					printError (elem, "Class must implement " + xIntf.toString());
+				}
+				else {
+					XPropertyComputer pc = xProperties_.createPropertyComputer(propIntf.getTypeArguments().get(0));
+					pc.addComputer(tElem);
+				}
+			}
+		}
+	}
+	
+	private void processGroupBuilder(RoundEnvironment env) {
+		TypeElement xIntf = processingEnv.getElementUtils().getTypeElement(IGroupBuilder.class.getCanonicalName());
+		for (Element elem: env.getElementsAnnotatedWith(GroupBuilder.class)) {
+			if (ElementKind.CLASS != elem.getKind()) {
+				printError (elem, "@GroupBuilder must annotate classes!");
+			}
+			else {
+				TypeElement tElem = (TypeElement)elem;
+				DeclaredType gbIntf = null;
+				
+				for (TypeMirror intf: tElem.getInterfaces()) {
+					DeclaredType dIntf = (DeclaredType)intf;
+					
+					if (dIntf.asElement().getSimpleName().equals(xIntf.getSimpleName())) {
+						gbIntf = dIntf;
+						break;
+					}
+				}
+				
+				if (null == gbIntf) {
+					printError (elem, "Class must implement " + xIntf.toString());
+				}
+				else {
+					TypeMirror elementsType = gbIntf.getTypeArguments().get(0);
+					TypeMirror entityType = gbIntf.getTypeArguments().get(1);
+					
+					if (null == xProperties_.getPropertyComputer(entityType) || 
+						null == xProperties_.getPropertyComputer(elementsType)) {
+						printWarning (elem, "There is no @GroupBuilder for the mentioned type. Ignoring!");
+					}
+					else {
+						xProperties_.getPropertyComputer(entityType).addGroupBuilder(tElem);
+					}
+				}
+			}
+		}
+	}
+}
