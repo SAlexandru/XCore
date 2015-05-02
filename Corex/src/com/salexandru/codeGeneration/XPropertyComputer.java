@@ -4,7 +4,9 @@ import com.salexandru.corex.interfaces.Group;
 import com.salexandru.corex.interfaces.XEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -79,17 +81,24 @@ public class XPropertyComputer {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", computer.getName()));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {
-			s.append(String.format("    public static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
+			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
 			
 		}
 		s.append("\n\n");
 		s.append("    public " + getNameImpl() + "(" + underlyingType_ + " underlyingObj) {\n");
 		s.append("        underlyingObj_ = underlyingObj;\n");
-		for (XGroupBuilder gb: groupBuilders_) {
-			s.append(String.format("        %1$s_INSTANCE.buildGroup(this);\n", gb.getName()));
-		}
 		s.append("    }\n");
 		
+		
+		final Map<String, List<String>> builders = new HashMap<>();
+		
+		for (final XGroupBuilder gb: groupBuilders_) {
+			final String x = gb.getEntityType().asElement().getSimpleName().toString();
+			if (null == builders.get(x)) {
+				builders.put(x, new ArrayList<>());
+			}
+			builders.get(x).add(gb.getName() + "_INSTANCE");
+		}
 		
 		
 		s.append("    @Override\n");
@@ -98,7 +107,8 @@ public class XPropertyComputer {
 		s.append("    }\n");
 		for (XComputer computer: computers_) {
 			s.append("@Override\n");
-			s.append(computer.generateImpl(computer.getName() + "_INSTANCE"));
+			final String x = computer.getEntityType().toString();
+			s.append(computer.generateImpl(computer.getName() + "_INSTANCE", builders.get(x)));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {
 			s.append("@Override\n");

@@ -82,9 +82,14 @@ public class XComputer {
 		return doc + "public " + returnType_ + " " + getCamelCaseName() + "();\n";
 	}
 	
-	public String generateImpl(String instanceName) {
+	public String generateImpl(String instanceName, List<String> groups) {
 		StringBuilder impl = new StringBuilder();
 		impl.append("public " + returnType_ + " " + getCamelCaseName() + "() {\n");
+		if (null != groups) {
+			for (final String groupInstanceCall : groups) {
+				impl.append("	" + groupInstanceCall + ".buildGroup(this);\n");
+			}
+		}
 		impl.append("    return " + instanceName + ".compute(this);\n");
 		impl.append("}\n");
 		return impl.toString();
