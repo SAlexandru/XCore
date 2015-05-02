@@ -3,6 +3,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import xmetamodel.XClass;
@@ -16,7 +17,8 @@ public class NumberOfLines implements IPropertyComputer<Integer, XClass> {
 	public Integer compute(XClass entity) {
 		
 		int count = 0;
-		ICompilationUnit unit = entity.getUnderlyingObject();
+		
+		IType unit = entity.getUnderlyingObject();
 		
 		try {
 			Matcher match = Pattern.compile("[^\n\r]{1,}").matcher(unit.getSource());

@@ -1,7 +1,11 @@
 package xcorexview.metrics.Groups;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import xmetamodel.XPackage;
@@ -20,14 +24,63 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 		group_ = new Group<>();
 	}
 	
-	@Override
-	public void buildGroup(XProject entity) {
+	private void getPackages(final IPackageFragmentRoot rootFragment) {
 		try {
-			for (final IJavaElement element: entity.getUnderlyingObject().getChildren()) {
-				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-					group_.add(FactoryMethod.createXPackage((IPackageFragment)element));
+			if (null == rootFragment || IPackageFragmentRoot.K_SOURCE != rootFragment.getKind()) {
+				return;
+			}
+			
+			for (final IJavaElement element: rootFragment.getChildren()) {
+				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+					getPackages((IPackageFragmentRoot)element);
+				}
+				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+					getPackages((IPackageFragment)element);
 				}
 			}
+			
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void getPackages(final IPackageFragment fragment) {
+		try {
+			if (null == fragment || IPackageFragmentRoot.K_SOURCE != fragment.getKind()) {
+				return ;
+			}
+			
+			group_.add(FactoryMethod.createXPackage(fragment));
+			
+			if (fragment.hasSubpackages()) {
+				for (final IJavaElement element: fragment.getChildren()) {
+					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+						getPackages((IPackageFragmentRoot)element);
+					}
+					else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+						getPackages((IPackageFragment)element);
+					}
+				}			
+			}
+			
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@Override
+	public void buildGroup(XProject entity) {
+		try {	
+			for (final IPackageFragment fragment: entity.getUnderlyingObject().getPackageFragments()) {
+				if (fragment.isDefaultPackage()) {
+					continue;
+				}
+				getPackages(fragment);
+			}
+		
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

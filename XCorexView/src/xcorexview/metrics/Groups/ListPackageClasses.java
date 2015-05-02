@@ -2,6 +2,9 @@ package xcorexview.metrics.Groups;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import xmetamodel.XClass;
@@ -24,15 +27,21 @@ public class ListPackageClasses implements IGroupBuilder<XClass, XPackage> {
 	public void buildGroup(XPackage entity) {
 		try {
 			for (final IJavaElement element: entity.getUnderlyingObject().getChildren()) {
-				if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-					group_.add(FactoryMethod.createXClass((ICompilationUnit)element));
+				if (element.getElementType() == IJavaElement.TYPE) {
+					group_.add(FactoryMethod.createXClass((IType)element));
+				}
+				else if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+					IType type = ((ICompilationUnit)element).findPrimaryType();
+					
+					if (null != type) {
+						group_.add(FactoryMethod.createXClass(type));
+					}
 				}
 			}
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override

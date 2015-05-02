@@ -1,6 +1,5 @@
 package xcorexview.metrics.Groups;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -23,10 +22,8 @@ public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {
 	@Override
 	public void buildGroup(XClass entity) {
 		try {
-			for (final IJavaElement element: entity.getUnderlyingObject().getChildren()) {
-				if (element.getElementType() == IJavaElement.METHOD) {
-					group_.add(FactoryMethod.createXMethod((IMethod)element));
-				}
+			for (final IMethod method: entity.getUnderlyingObject().getMethods()) {
+					group_.add(FactoryMethod.createXMethod(method));
 			}
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block

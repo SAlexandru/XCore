@@ -5,8 +5,8 @@
          point="org.eclipse.ui.views">
       <view
             class="xcorexview.view.CorexTableView"
-            id="com.salexandru.xcorexview.view.CorexTreeView"
-            name="CorexTreeView"
+            id="com.salexandru.xcorexview.view.CorexTableView"
+            name="CorexTableView"
             restorable="true">
       </view>
    </extension>

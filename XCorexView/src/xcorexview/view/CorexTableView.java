@@ -3,10 +3,8 @@ package xcorexview.view;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -36,7 +34,7 @@ public class CorexTableView extends ViewPart {
 	private Stack<List<String>> propertyHistory_ = new Stack<>();
 	
 	private static int MAX = 12;
-	public static String viewId = "com.salexandru.xcorexview.view.CorexTreeView";
+	public static String viewId = "com.salexandru.xcorexview.view.CorexTableView";
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -56,12 +54,6 @@ public class CorexTableView extends ViewPart {
 			}
 		});
 		
-		viewer_.setLabelProvider(new CorexLabelProvider());
-		viewer_.setUseHashlookup(false);
-		viewer_.getTable().setHeaderVisible(true);
-		viewer_.getTable().setLinesVisible(true);
-		viewer_.setInput(dataHistory_);
-		
 		for (int i = 0; i < MAX; ++i) {
 			TableViewerColumn column = new TableViewerColumn(viewer_, SWT.NONE);
 			column.getColumn().setMoveable(true);
@@ -69,6 +61,12 @@ public class CorexTableView extends ViewPart {
 			column.getColumn().setText("");
 			column.getColumn().setWidth(100);			
 		}
+		
+		viewer_.setLabelProvider(new CorexLabelProvider());
+		viewer_.setUseHashlookup(false);
+		viewer_.getTable().setHeaderVisible(true);
+		viewer_.getTable().setLinesVisible(true);
+		viewer_.setInput(dataHistory_);
 		
 		addControlButtons();
 	}
@@ -80,8 +78,13 @@ public class CorexTableView extends ViewPart {
 	
 	public void displayEntity(XEntity entity) {
 		try {
-			dataHistory_.push(Arrays.asList(entity));
-			propertyHistory_.push(Arrays.asList("name"));
+			ArrayList<XEntity> data = new ArrayList<>();
+			ArrayList<String> prop = new ArrayList<>();
+			data.add(entity);
+			prop.add("Name");
+			
+			dataHistory_.add(data);
+			propertyHistory_.add(prop);
 			buildView();
 		}
 		catch (Throwable e) {
@@ -114,6 +117,14 @@ public class CorexTableView extends ViewPart {
 		viewer_.refresh(true);
 	}
 	
+	private String capitalize(String name) {
+		return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	}
+	
+	private String decapitalize(String name) {
+		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	}
+
 	private void addControlButtons() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		
@@ -121,9 +132,10 @@ public class CorexTableView extends ViewPart {
 			@Override
 			public void run() {
 				if (!dataHistory_.isEmpty()) {
-					dataHistory_.pop();
-					propertyHistory_.pop();
-					//TODO rebuild view
+					dataHistory_.remove(dataHistory_.size() - 1);
+					propertyHistory_.remove(dataHistory_.size() - 1);
+					buildView();
+					viewer_.refresh(true);
 				}
 			}
 		});
@@ -156,21 +168,36 @@ public class CorexTableView extends ViewPart {
 			MenuItem item = new MenuItem(propertyMenu, SWT.NONE);
 			item.setText(property);
 			item.addListener(SWT.Selection, (Event e) -> {
-				
+				MenuItem menuItem = (MenuItem)e.widget;
+				if (!propertyHistory_.peek().contains(menuItem.getText())) {
+					propertyHistory_.peek().add(menuItem.getText());
+					viewer_.getTable().getColumn(propertyHistory_.peek().size() - 1).setText(menuItem.getText());
+					viewer_.getTable().getColumn(propertyHistory_.peek().size()).setWidth(100);
+					viewer_.refresh(true);
+				}
 			});
 		}
 		
 		new MenuItem(main, SWT.SEPARATOR);
 		
 		MenuItem groupMenuItem = new MenuItem(main, SWT.CASCADE);
-		groupMenuItem.setMenu(propertyMenu);
-		groupMenuItem.setText("Properties");
+		groupMenuItem.setMenu(groupMenu);
+		groupMenuItem.setText("Group");
 		
 		for (String group: groups) {
 			MenuItem item = new MenuItem(groupMenu, SWT.NONE);
 			item.setText(group);
 			item.addListener(SWT.Selection, (Event e) -> {
+				XEntity element = dataHistory_.peek().get(viewer_.getTable().getSelectionIndex());
+				MenuItem menuItem = (MenuItem)e.widget;
 				
+				@SuppressWarnings("unchecked")
+				Group<XEntity> groupElement = (Group<XEntity>)applyMethod(element, menuItem.getText());
+				dataHistory_.add(groupElement.getElements());
+				List<String> array = new ArrayList<>();
+				array.add("Name");
+				propertyHistory_.add(array);
+				buildView();
 			});
 		}
 		
@@ -180,9 +207,9 @@ public class CorexTableView extends ViewPart {
 	private List<String> getEntityProperties(XEntity entity) {
 		List<String> names = new ArrayList<>();
 		
-		for (Method m: entity.getClass().getMethods()) {
+		for (Method m: entity.getClass().getInterfaces()[0].getDeclaredMethods()) {
 			if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
-				names.add(m.getName());
+				names.add(capitalize(m.getName()));
 			}
 		}
 		
@@ -192,24 +219,24 @@ public class CorexTableView extends ViewPart {
 	private List<String> getEntityGroups(XEntity entity) {
 		List<String> names = new ArrayList<>();
 		
-		for (Method m: entity.getClass().getMethods()) {
+		for (Method m: entity.getClass().getInterfaces()[0].getDeclaredMethods()) {
 			if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
-				names.add(m.getName());
+				names.add(capitalize(m.getName()));
 			}
 		}
 		
 		return names;
 	}
 	
-	private String applyMethod(XEntity entity, String methodName) {
+	private Object applyMethod(XEntity entity, String methodName) {
 		try {
-			return entity.getClass().getMethod(methodName).invoke(entity).toString();
+			return entity.getClass().getMethod(decapitalize(methodName)).invoke(entity);
 		} catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 			e.printStackTrace();
 		}
-		return "Exception occured when computing: " + methodName;
+		return null;
 	}
 	
 	private class CorexLabelProvider extends LabelProvider implements ITableLabelProvider {
@@ -221,9 +248,9 @@ public class CorexTableView extends ViewPart {
 
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
-			return dataHistory_.isEmpty() || dataHistory_.peek().size() <= columnIndex ? 
+			return (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex) ? 
 				   "" : 
-				  applyMethod(dataHistory_.peek().get(columnIndex), "name");
+				  applyMethod((XEntity)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
 		}
 		
 	}

@@ -1,6 +1,6 @@
 package xcorexview.metrics.methods;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -27,10 +27,14 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 
 	@Override
 	public Integer compute(XMethod entity) {
-		ICompilationUnit unit = entity.getUnderlyingObject().getCompilationUnit();
-		
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		astParser.setSource(unit);
+		try {
+			astParser.setSource(entity.getUnderlyingObject().getSource().toCharArray());
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1;
+		}
 		
 		NodeVisitor visitor = new NodeVisitor();
 		astParser.createAST(null).accept(visitor);

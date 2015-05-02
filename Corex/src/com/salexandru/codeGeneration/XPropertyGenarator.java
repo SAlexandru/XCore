@@ -62,7 +62,7 @@ public class XPropertyGenarator {
 		out.write("import " + XPropertyComputer.PACKAGE_IMPL + ".*;\n");
 		out.write("\n");
 		out.write("public class FactoryMethod {\n");
-		out.write("   private static LRUCache<XEntity, XEntity> lruCache_ = new LRUCache<>(1000);\n");
+		out.write("   private static LRUCache<Object, XEntity> lruCache_ = new LRUCache<>(1000);\n");
 		out.write("   private FactoryMethod() {}\n");
 		out.write("   public static void setCacheCapacity(int capacity) {\n");
 		out.write("       lruCache_.setCapacity(capacity);\n");
@@ -73,7 +73,7 @@ public class XPropertyGenarator {
 			out.write("       XEntity instance = lruCache_.get(obj);\n");
 			out.write("        if (null == instance) {\n");
 			out.write("           instance = new " + pc.getNameImpl() + "(obj);\n");
-			out.write("           lruCache_.put(instance, instance);\n");
+			out.write("           lruCache_.put(obj, instance);\n");
 			out.write("        }\n");
 			out.write("        return (" + pc.getName() +")instance;\n");
 			out.write("    }\n");

@@ -1,12 +1,13 @@
 package xcorexview.metrics.methods;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+
 import xmetamodel.XMethod;
 
 import com.salexandru.corex.interfaces.IPropertyComputer;
@@ -17,10 +18,15 @@ public class NumberOfNullChecks implements IPropertyComputer<Integer, XMethod> {
 
 	@Override
 	public Integer compute(XMethod entity) {
-		ICompilationUnit unit = entity.getUnderlyingObject().getCompilationUnit();
 		
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		astParser.setSource(unit);
+		try {
+			astParser.setSource(entity.getUnderlyingObject().getSource().toCharArray());
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1;
+		}
 		
 		NodeVisitor visitor = new NodeVisitor();
 		astParser.createAST(null).accept(visitor);

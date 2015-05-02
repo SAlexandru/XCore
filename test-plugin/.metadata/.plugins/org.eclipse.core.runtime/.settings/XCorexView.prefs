@@ -1,5 +1,0 @@
-XClass=org.eclipse.jdt.core.ICompilationUnit
-XMethod=org.eclipse.jdt.core.IMethod
-XPackage=org.eclipse.jdt.core.IPackageFragment
-XProject=org.eclipse.jdt.core.IJavaProject
-eclipse.preferences.version=1
