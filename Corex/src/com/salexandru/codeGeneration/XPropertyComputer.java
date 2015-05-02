@@ -81,7 +81,7 @@ public class XPropertyComputer {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", computer.getName()));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {
-			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
+			s.append(String.format("    private %1$s %1$s_INSTANCE;\n", gb.getName()));
 			
 		}
 		s.append("\n\n");
@@ -92,15 +92,6 @@ public class XPropertyComputer {
 		
 		final Map<String, List<String>> builders = new HashMap<>();
 		
-		for (final XGroupBuilder gb: groupBuilders_) {
-			final String x = gb.getEntityType().asElement().getSimpleName().toString();
-			if (null == builders.get(x)) {
-				builders.put(x, new ArrayList<>());
-			}
-			builders.get(x).add(gb.getName() + "_INSTANCE");
-		}
-		
-		
 		s.append("    @Override\n");
 		s.append("    public " + underlyingType_ +" getUnderlyingObject() {\n");
 		s.append("        return underlyingObj_;\n");
@@ -108,7 +99,7 @@ public class XPropertyComputer {
 		for (XComputer computer: computers_) {
 			s.append("@Override\n");
 			final String x = computer.getEntityType().toString();
-			s.append(computer.generateImpl(computer.getName() + "_INSTANCE", builders.get(x)));
+			s.append(computer.generateImpl(computer.getName() + "_INSTANCE"));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {
 			s.append("@Override\n");
