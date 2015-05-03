@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -15,13 +18,19 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
+import xmetamodel.XClass;
+import xmetamodel.XMethod;
 import xmetamodel.factory.FactoryMethod;
 
 import com.salexandru.corex.interfaces.Group;
@@ -112,6 +121,42 @@ public class CorexTableView extends ViewPart {
 			viewer_.getTable().setSortColumn(null);	
 			viewer_.getTable().setSortDirection(SWT.NONE);
 			viewer_.getTable().setMenu(addMenues(entity));
+		
+			viewer_.getTable().addMouseListener(new MouseListener() {
+
+				@Override
+				public void mouseDoubleClick(MouseEvent e) {
+					int selection = viewer_.getTable().getSelectionIndex();
+					if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
+						return;
+					}
+					XEntity entity = dataHistory_.peek().get(selection);
+					try {
+						if (entity instanceof XClass) {
+							JavaUI.openInEditor(((XClass)entity).getUnderlyingObject(), true, true);
+						}
+						else if (entity instanceof XMethod) {
+							JavaUI.openInEditor(((XMethod)entity).getUnderlyingObject(), true, true);
+						}
+					}
+					catch (PartInitException | JavaModelException e1) {
+						e1.printStackTrace();
+					}
+				}
+
+				@Override
+				public void mouseDown(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseUp(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
 		}
 		
 		viewer_.refresh(true);

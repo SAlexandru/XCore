@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface,
  org.eclipse.equinox.registry,
  org.eclipse.swt,
- org.eclipse.core.commands
+ org.eclipse.core.commands,
+ org.eclipse.jdt.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/CorexInterfaces.jar
