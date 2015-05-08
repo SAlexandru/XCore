@@ -34,7 +34,7 @@ public class BrowseEntityAction implements IObjectActionDelegate {
 			
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			try {
-				page.showView("InsiderViewer.Insider");
+				page.showView(CorexTableView.viewId);
 			} catch (PartInitException e) {
 				e.printStackTrace();
 				return;
