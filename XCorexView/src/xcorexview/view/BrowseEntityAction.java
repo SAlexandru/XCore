@@ -18,7 +18,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.salexandru.corex.interfaces.XEntity;
+import com.salexandru.xcorex.interfaces.XEntity;
 
 import xmetamodel.factory.FactoryMethod;
 
@@ -34,20 +34,20 @@ public class BrowseEntityAction implements IObjectActionDelegate {
 			
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			try {
-				page.showView(CorexTableView.viewId);
+				page.showView(XCorexTableView.viewId);
 			} catch (PartInitException e) {
 				e.printStackTrace();
 				return;
 			}
 			
 			try {
-				page.showView(CorexTableView.viewId);
+				page.showView(XCorexTableView.viewId);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-			CorexTableView view = (CorexTableView)page.findView(CorexTableView.viewId);
+			XCorexTableView view = (XCorexTableView)page.findView(XCorexTableView.viewId);
 			view.displayEntity(entity);
 		}
 		catch (ClassCastException e) {

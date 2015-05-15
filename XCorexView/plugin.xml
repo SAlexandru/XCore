@@ -4,9 +4,9 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="xcorexview.view.CorexTableView"
-            id="com.salexandru.xcorexview.view.CorexTableView"
-            name="CorexTableView"
+            class="xcorexview.view.XCorexTableView"
+            id="com.salexandru.xcorexview.view.XCorexTableView"
+            name="XCorexTableView"
             restorable="true">
       </view>
    </extension>

@@ -7,9 +7,9 @@ import xmetamodel.XClass;
 import xmetamodel.XMethod;
 import xmetamodel.factory.FactoryMethod;
 
-import com.salexandru.corex.interfaces.Group;
-import com.salexandru.corex.interfaces.IGroupBuilder;
-import com.salexandru.corex.metaAnnotation.GroupBuilder;
+import com.salexandru.xcorex.interfaces.Group;
+import com.salexandru.xcorex.interfaces.IGroupBuilder;
+import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {

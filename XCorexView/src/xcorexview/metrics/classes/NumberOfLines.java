@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import xmetamodel.XClass;
 
-import com.salexandru.corex.interfaces.IPropertyComputer;
-import com.salexandru.corex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcorex.interfaces.IPropertyComputer;
+import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
 public class NumberOfLines implements IPropertyComputer<Integer, XClass> {
