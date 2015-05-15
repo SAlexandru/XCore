@@ -18,13 +18,7 @@ import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
-	private Group<XPackage> group_;
-	
-	public ListProjectPackages() {
-		group_ = new Group<>();
-	}
-	
-	private void getPackages(final IPackageFragmentRoot rootFragment) {
+	private void getPackages(final IPackageFragmentRoot rootFragment, final Group<XPackage> group_) {
 		try {
 			if (null == rootFragment || IPackageFragmentRoot.K_SOURCE != rootFragment.getKind()) {
 				return;
@@ -32,10 +26,10 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 			
 			for (final IJavaElement element: rootFragment.getChildren()) {
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-					getPackages((IPackageFragmentRoot)element);
+					getPackages((IPackageFragmentRoot)element, group_);
 				}
 				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-					getPackages((IPackageFragment)element);
+					getPackages((IPackageFragment)element, group_);
 				}
 			}
 			
@@ -45,7 +39,7 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 		}
 	}
 	
-	private void getPackages(final IPackageFragment fragment) {
+	private void getPackages(final IPackageFragment fragment, final Group<XPackage> group_) {
 		try {
 			if (null == fragment || IPackageFragmentRoot.K_SOURCE != fragment.getKind()) {
 				return ;
@@ -56,10 +50,10 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 			if (fragment.hasSubpackages()) {
 				for (final IJavaElement element: fragment.getChildren()) {
 					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-						getPackages((IPackageFragmentRoot)element);
+						getPackages((IPackageFragmentRoot)element, group_);
 					}
 					else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-						getPackages((IPackageFragment)element);
+						getPackages((IPackageFragment)element, group_);
 					}
 				}			
 			}
@@ -72,24 +66,21 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 	
 	
 	@Override
-	public void buildGroup(XProject entity) {
+	public Group<XPackage> buildGroup(XProject entity) {
+		Group<XPackage> group_ = new Group<>();
 		try {	
 			for (final IPackageFragment fragment: entity.getUnderlyingObject().getPackageFragments()) {
 				if (fragment.isDefaultPackage()) {
 					continue;
 				}
-				getPackages(fragment);
+				getPackages(fragment, group_);
 			}
 		
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
-
-	@Override
-	public Group<XPackage> getGroup() {
 		return group_;
 	}
+
 }

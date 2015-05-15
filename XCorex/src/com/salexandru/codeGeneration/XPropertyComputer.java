@@ -81,7 +81,7 @@ public class XPropertyComputer {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", computer.getName()));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {
-			s.append(String.format("    private %1$s %1$s_INSTANCE;\n", gb.getName()));
+			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
 			
 		}
 		s.append("\n\n");
@@ -90,15 +90,13 @@ public class XPropertyComputer {
 		s.append("    }\n");
 		
 		
-		final Map<String, List<String>> builders = new HashMap<>();
-		
 		s.append("    @Override\n");
 		s.append("    public " + underlyingType_ +" getUnderlyingObject() {\n");
 		s.append("        return underlyingObj_;\n");
 		s.append("    }\n");
+		
 		for (XComputer computer: computers_) {
 			s.append("@Override\n");
-			final String x = computer.getEntityType().toString();
 			s.append(computer.generateImpl(computer.getName() + "_INSTANCE"));
 		}
 		for (XGroupBuilder gb: groupBuilders_) {

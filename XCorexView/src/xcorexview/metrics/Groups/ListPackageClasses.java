@@ -17,14 +17,9 @@ import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListPackageClasses implements IGroupBuilder<XClass, XPackage> {
-	private Group<XClass> group_;
-	
-	public ListPackageClasses() {
-		group_ = new Group<>();
-	}
-	
 	@Override
-	public void buildGroup(XPackage entity) {
+	public Group<XClass> buildGroup(XPackage entity) {
+		Group<XClass> group_ = new Group<>();
 		try {
 			for (final IJavaElement element: entity.getUnderlyingObject().getChildren()) {
 				if (element.getElementType() == IJavaElement.TYPE) {
@@ -42,10 +37,6 @@ public class ListPackageClasses implements IGroupBuilder<XClass, XPackage> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public Group<XClass> getGroup() {
 		return group_;
 	}
 }

@@ -177,8 +177,8 @@ public class XCorexTableView extends ViewPart {
 			@Override
 			public void run() {
 				if (!dataHistory_.isEmpty()) {
-					dataHistory_.remove(dataHistory_.size() - 1);
-					propertyHistory_.remove(dataHistory_.size() - 1);
+					dataHistory_.pop();
+					propertyHistory_.pop();
 					buildView();
 					viewer_.refresh(true);
 				}
@@ -238,10 +238,10 @@ public class XCorexTableView extends ViewPart {
 				
 				@SuppressWarnings("unchecked")
 				Group<XEntity> groupElement = (Group<XEntity>)applyMethod(element, menuItem.getText());
-				dataHistory_.add(groupElement.getElements());
+				dataHistory_.push(groupElement.getElements());
 				List<String> array = new ArrayList<>();
 				array.add("Name");
-				propertyHistory_.add(array);
+				propertyHistory_.push(array);
 				buildView();
 			});
 		}

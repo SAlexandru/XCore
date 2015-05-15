@@ -74,13 +74,9 @@ public class XGroupBuilder {
 	}
 	
 	public String generateImpl(String instanceName) {
-		return String.format("public Group<%s> %s() {\n  if (null == %s) {%s = new %s(); %s.buildGroup(this);}\n return %s.getGroup();\n}", 
+		return String.format("public Group<%s> %s() {\n  return %s.buildGroup(this);\n}", 
 							  elementType_.asElement().getSimpleName(), 
 							   getCamelCaseName(),
-							   instanceName,
-							   instanceName,
-							   getName(),
-							   instanceName,
 							   instanceName
 							 );
 	}

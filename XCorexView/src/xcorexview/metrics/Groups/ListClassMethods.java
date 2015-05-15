@@ -13,14 +13,9 @@ import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {
-	private Group<XMethod> group_;
-	
-	public ListClassMethods() {
-		group_ = new Group<>();
-	}
-	
 	@Override
-	public void buildGroup(XClass entity) {
+	public Group<XMethod> buildGroup(XClass entity) {
+		Group<XMethod> group_ = new Group<>();
 		try {
 			for (final IMethod method: entity.getUnderlyingObject().getMethods()) {
 					group_.add(FactoryMethod.createXMethod(method));
@@ -30,10 +25,6 @@ public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {
 			e.printStackTrace();
 		}
 		
-	}
-
-	@Override
-	public Group<XMethod> getGroup() {
 		return group_;
 	}
 }
