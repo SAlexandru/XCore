@@ -12,9 +12,9 @@ import xmetamodel.XPackage;
 import xmetamodel.XProject;
 import xmetamodel.factory.FactoryMethod;
 
-import com.salexandru.corex.interfaces.Group;
-import com.salexandru.corex.interfaces.IGroupBuilder;
-import com.salexandru.corex.metaAnnotation.GroupBuilder;
+import com.salexandru.xcorex.interfaces.Group;
+import com.salexandru.xcorex.interfaces.IGroupBuilder;
+import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {

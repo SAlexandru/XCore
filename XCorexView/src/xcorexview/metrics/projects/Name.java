@@ -2,8 +2,8 @@ package xcorexview.metrics.projects;
 
 import xmetamodel.XProject;
 
-import com.salexandru.corex.interfaces.IPropertyComputer;
-import com.salexandru.corex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcorex.interfaces.IPropertyComputer;
+import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
 public class Name implements IPropertyComputer<String, XProject> {

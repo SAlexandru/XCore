@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import xmetamodel.XMethod;
 
-import com.salexandru.corex.interfaces.IPropertyComputer;
-import com.salexandru.corex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcorex.interfaces.IPropertyComputer;
+import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
 public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod> {
