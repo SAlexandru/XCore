@@ -1,8 +1,5 @@
 package xcorexview.metrics.Groups;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -39,13 +36,24 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 		}
 	}
 	
+	private boolean isValid(final IPackageFragment fragment) throws JavaModelException {
+		for (final IJavaElement element: fragment.getChildren()) {
+			if (IJavaElement.COMPILATION_UNIT == element.getElementType()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void getPackages(final IPackageFragment fragment, final Group<XPackage> group_) {
 		try {
 			if (null == fragment || IPackageFragmentRoot.K_SOURCE != fragment.getKind()) {
 				return ;
 			}
 			
-			group_.add(FactoryMethod.createXPackage(fragment));
+			if (isValid(fragment)) {
+				group_.add(FactoryMethod.createXPackage(fragment));
+			}
 			
 			if (fragment.hasSubpackages()) {
 				for (final IJavaElement element: fragment.getChildren()) {

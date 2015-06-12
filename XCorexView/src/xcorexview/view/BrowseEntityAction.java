@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -18,9 +17,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.salexandru.xcorex.interfaces.XEntity;
-
 import xmetamodel.factory.FactoryMethod;
+
+import com.salexandru.xcorex.interfaces.XEntity;
 
 
 public class BrowseEntityAction implements IObjectActionDelegate {

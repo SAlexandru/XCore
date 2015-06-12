@@ -1,0 +1,12 @@
+package xmetamodel;
+import com.salexandru.xcorex.interfaces.XEntity;
+import com.salexandru.xcorex.interfaces.Group;
+
+public interface XClass extends XEntity {
+public java.lang.Integer numberOfLines();
+
+public java.lang.String name();
+
+Group<XMethod> listClassMethods();
+org.eclipse.jdt.core.IType getUnderlyingObject();
+}

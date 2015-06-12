@@ -1,6 +1,5 @@
 package xcorexview.metrics.methods;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Scanner;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -14,21 +13,25 @@ public class NumberOfLines implements IPropertyComputer<Integer, XMethod> {
 	@Override
 	public Integer compute(XMethod entity) {
 		
-		int count = 0;
 		try {
-			String source = entity.getUnderlyingObject().getSource();
-			source = source.replaceAll( "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "$1 " );
-			Matcher match = Pattern.compile("[^\n\r]{1,}").matcher(source);
+			final String commentsRegex = "(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)";
+			System.out.println(entity.getUnderlyingObject().getSource());
+			final String sourceCode = entity.getUnderlyingObject().getSource().replaceAll(commentsRegex, "");
+			System.out.println(entity.getUnderlyingObject().getSource());
 			
-			while (match.find()) {
-				++count;
+			int count = 0;
+			for (final Scanner scanner = new Scanner(sourceCode); scanner.hasNext(); ) {
+				final String line = scanner.nextLine();
+				if (!line.trim().isEmpty()) {
+					++count;
+				}
 			}
-			
+			return count;
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return count;
+		return 0;
 	}
 }

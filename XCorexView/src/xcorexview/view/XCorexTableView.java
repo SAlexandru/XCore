@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
@@ -293,6 +292,8 @@ public class XCorexTableView extends ViewPart {
 
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
+			boolean query = (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex);
+			System.out.println(columnIndex + " " + propertyHistory_.peek().size() + ": " + query);
 			return (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex) ? 
 				   "" : 
 				  applyMethod((XEntity)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
