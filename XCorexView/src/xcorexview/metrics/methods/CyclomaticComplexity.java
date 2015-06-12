@@ -29,26 +29,8 @@ import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
  * @param entity  the XClass used for processing
  */
 @PropertyComputer
-/**
- * 
- * @author SAlexandru34
- *
- * @param entity  the XClass used for processing
- */
 public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod> {
-	/**
-	 * 
-	 * @author SAlexandru34
-	 *
-	 * @param entity  the XClass used for processing
-	 */
 	@Override
-	/**
-	 * 
-	 * @author SAlexandru22344
-	 *
-	 * @param entity  the XClass used for processing
-	 */
 	public Integer compute(XMethod entity) {
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		try {

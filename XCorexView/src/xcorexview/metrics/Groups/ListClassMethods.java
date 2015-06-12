@@ -11,21 +11,15 @@ import com.salexandru.xcorex.interfaces.Group;
 import com.salexandru.xcorex.interfaces.IGroupBuilder;
 import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
 
-
-@GroupBuilder
 /**
  * 
- * @author SAlexandru
+ * @author SAlexandru222
  *
+ * @param entity  the XClass used for processing
  */
+@GroupBuilder
 public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {
 	@Override
-	/**
-	 * 
-	 * @author SAlexandru222
-	 *
-	 * @param entity  the XClass used for processing
-	 */
 	public Group<XMethod> buildGroup(XClass entity) {
 		Group<XMethod> group_ = new Group<>();
 		try {
