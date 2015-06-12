@@ -141,6 +141,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 				}
 				try {
 					XComputer computer = new XComputer(tElem);
+					processingEnv.getElementUtils().getDocComment(tElem.getEnclosingElement());
 					computer.setElementUtils(processingEnv.getElementUtils());
 					xProperties_.createPropertyComputer(computer.getEntityType()).addComputer(computer);
 				}

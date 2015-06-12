@@ -74,7 +74,15 @@ public class XGroupBuilder {
 	}
 	
 	public String generateImpl(String instanceName) {
-		return String.format("public Group<%s> %s() {\n  return %s.buildGroup(this);\n}", 
+		StringBuilder doc = new StringBuilder("");
+		if (null != utils_) {
+			if (null != utils_.getDocComment(getBuilder())) {
+				doc = new StringBuilder("/**\n");
+				doc.append(utils_.getDocComment(getBuilder()));
+				doc.append("\n*/\n");
+			}
+		}
+		return doc + String.format("public Group<%s> %s() {\n  return %s.buildGroup(this);\n}", 
 							  elementType_.asElement().getSimpleName(), 
 							   getCamelCaseName(),
 							   instanceName

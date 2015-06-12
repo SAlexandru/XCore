@@ -84,7 +84,15 @@ public class XComputer {
 	
 	public String generateImpl(String instanceName) {
 		StringBuilder impl = new StringBuilder();
-		impl.append("public " + returnType_ + " " + getCamelCaseName() + "() {\n");
+		StringBuilder doc = new StringBuilder("");
+		if (null != utils_) {
+			if (null != utils_.getDocComment(getComputer())) {
+				doc = new StringBuilder("/**\n");
+				doc.append(utils_.getDocComment(getComputer()));
+				doc.append("\n*/\n");
+			}
+		}
+		impl.append(doc + "public " + returnType_ + " " + getCamelCaseName() + "() {\n");
 		impl.append("    return " + instanceName + ".compute(this);\n");
 		impl.append("}\n");
 		return impl.toString();
