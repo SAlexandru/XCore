@@ -1,10 +1,10 @@
 package xcorexview.metrics.methods;
 
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import xmetamodel.XMethod;
 
@@ -18,15 +18,10 @@ public class NumberOfCasts implements IPropertyComputer<Integer, XMethod> {
 	public Integer compute(XMethod entity) {
 		
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		try {
-			astParser.setSource(entity.getUnderlyingObject().getSource().toCharArray());
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -1;
-		}
+
+		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
-		NodeVisitor visitor = new NodeVisitor();
+		NodeVisitor visitor = new NodeVisitor(entity.name());
 		astParser.createAST(null).accept(visitor);
 		
 		return visitor.getCount();
@@ -34,6 +29,16 @@ public class NumberOfCasts implements IPropertyComputer<Integer, XMethod> {
 	
 	private static final class NodeVisitor extends ASTVisitor {
 		private int count = 0;
+		private final String methodName;
+		
+		public NodeVisitor(final String name) {
+			methodName = name;
+		}
+		
+		@Override
+		public boolean visit(MethodDeclaration d) {
+			return d.getName().toString().equals(methodName);
+		}
 		
 		@Override
 		public boolean visit(CastExpression node) {

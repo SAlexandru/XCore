@@ -1,6 +1,5 @@
 package xcorexview.metrics.methods;
 
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -12,6 +11,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -33,15 +33,11 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 	@Override
 	public Integer compute(XMethod entity) {
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		try {
-			astParser.setSource(entity.getUnderlyingObject().getSource().toCharArray());
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -1;
-		}
+	
+		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
-		NodeVisitor visitor = new NodeVisitor();
+		
+		NodeVisitor visitor = new NodeVisitor(entity.name());
 		astParser.createAST(null).accept(visitor);
 		
 		return visitor.getCount();
@@ -49,6 +45,16 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 	
 	private static final class NodeVisitor extends ASTVisitor {
 		private int count = 0;
+		private final String methodName;
+		
+		public NodeVisitor(final String methodName) {
+			this.methodName = methodName;
+		}
+		
+		@Override
+		public boolean visit(MethodDeclaration d) {
+			return d.getName().toString().equals(methodName);
+		}
 		
 		@Override
 		public boolean visit(IfStatement node) {
@@ -92,11 +98,6 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 			return true;
 		}
 		
-		@Override
-		public boolean visit(ReturnStatement node) {
-			++count;
-			return true;
-		}
 		
 		@Override
 		public boolean visit(WhileStatement node) {
@@ -135,7 +136,7 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 		}
 			
 		
-		public int getCount() {return count;}
+		public int getCount() {return count + 1;}
 		
 	}
 

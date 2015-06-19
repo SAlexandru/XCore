@@ -1,11 +1,11 @@
 package xcorexview.metrics.methods;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import xmetamodel.XMethod;
@@ -13,20 +13,18 @@ import xmetamodel.XMethod;
 import com.salexandru.xcorex.interfaces.IPropertyComputer;
 import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
 
+
 @PropertyComputer
-public class NumberOfNullChecks implements IPropertyComputer<Integer, XMethod> {
+public class NumberOfFieldsAccessed implements IPropertyComputer <Integer, XMethod>{
 
 	@Override
 	public Integer compute(XMethod entity) {
-		
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		
 		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
-		
-		NodeVisitor visitor = new NodeVisitor(entity.name());
-		astParser.createAST(null).accept(visitor);
-		
+		final String name = entity.name();
+		final NodeVisitor visitor = new NodeVisitor(name);
+		astParser.createAST(null).accept(new NodeVisitor(name));
 		return visitor.getCount();
 	}
 	
@@ -34,8 +32,8 @@ public class NumberOfNullChecks implements IPropertyComputer<Integer, XMethod> {
 		private int count = 0;
 		private final String methodName;
 		
-		public NodeVisitor(final String methodName) {
-			this.methodName = methodName;
+		public NodeVisitor(final String name) {
+			methodName = name;
 		}
 		
 		@Override
@@ -44,24 +42,12 @@ public class NumberOfNullChecks implements IPropertyComputer<Integer, XMethod> {
 		}
 		
 		@Override
-		public boolean visit(IfStatement node) {
-			node.getExpression().accept(new ASTVisitor() {
-				@Override
-				public boolean visit(InfixExpression infixExpr) {
-					if (infixExpr.getLeftOperand().getNodeType() == ASTNode.NULL_LITERAL || 
-						infixExpr.getRightOperand().getNodeType() == ASTNode.NULL_LITERAL) {
-						++count;
-					}
-					return true;
-				}
-			});
-			
+		public boolean visit(FieldAccess node) {
+			++count;
 			return true;
 		}
-			
 		
 		public int getCount() {return count;}
 		
 	}
-
 }
