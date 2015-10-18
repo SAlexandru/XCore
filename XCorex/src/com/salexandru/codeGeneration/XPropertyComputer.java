@@ -1,14 +1,14 @@
 package com.salexandru.codeGeneration;
 
-import com.salexandru.xcorex.interfaces.Group;
-import com.salexandru.xcorex.interfaces.XEntity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.type.TypeMirror;
+
+import com.salexandru.xcore.interfaces.Group;
+import com.salexandru.xcore.interfaces.XEntity;
 
 public class XPropertyComputer {
 	private TypeMirror propertie_;

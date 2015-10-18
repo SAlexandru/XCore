@@ -8,7 +8,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
-import com.salexandru.xcorex.interfaces.IPropertyComputer;
+import com.salexandru.xcore.interfaces.IPropertyComputer;
 
 public class XComputer {
 	private TypeElement  computer_;

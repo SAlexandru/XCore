@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.lang.model.type.TypeMirror;
 
-import com.salexandru.xcorex.interfaces.XEntity;
+import com.salexandru.xcore.interfaces.XEntity;
 
 public class XPropertyGenarator {
 	private Map<String, XPropertyComputer> properties_;

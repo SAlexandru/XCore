@@ -4,23 +4,23 @@
 	<extension
 	   point="org.eclipse.jdt.apt.core.annotationProcessorFactory" >
 		<java6processors enableDefault="true">
-			<java6processor class="com.salexandru.xcorex.annotationProcessor.XAnnotationProcessor"/>
+			<java6processor class="com.salexandru.xcore.annotationProcessor.XAnnotationProcessor"/>
 		</java6processors>
 	</extension>
  <extension
        point="org.eclipse.ui.propertyPages">
     <page
-          class="com.salexandru.xcorex.preferencepage.XCorexPropertyPage"
-          id="com.salexandru.xcorex.XCorexPropertyPage"
-          name="XCorex"
+          class="com.salexandru.xcore.preferencepage.XCorexPropertyPage"
+          id="com.salexandru.xcore.XCorexPropertyPage"
+          name="XCore"
           objectClass="org.eclipse.jdt.core.IJavaProject">
     </page>
  </extension>
  <extension
        point="org.eclipse.jdt.core.classpathContainerInitializer">
     <classpathContainerInitializer
-          class="com.salexandru.xcorex.plugin.XCorexLibraryAdapter"
-          id="com.salexandru.xcorex.plugin.XCorexLibraryAdapter">
+          class="com.salexandru.xcore.plugin.XCorexLibraryAdapter"
+          id="com.salexandru.xcore.plugin.XCorexLibraryAdapter">
     </classpathContainerInitializer>
  </extension>
 </plugin>

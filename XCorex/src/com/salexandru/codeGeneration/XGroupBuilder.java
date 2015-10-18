@@ -5,7 +5,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
-import com.salexandru.xcorex.interfaces.IGroupBuilder;
+import com.salexandru.xcore.interfaces.IGroupBuilder;
 
 public class XGroupBuilder {
 	private TypeElement builder_;

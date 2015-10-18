@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: XCorex
-Bundle-SymbolicName: XCorex;singleton:=true
-Bundle-Version: 1.0.0
-Bundle-Activator: com.salexandru.xcorex.plugin.Activator
+Bundle-Name: XCore
+Bundle-SymbolicName: XCore;singleton:=true
+Bundle-Version: 1.0.2
+Bundle-Activator: com.salexandru.xcore.plugin.Activator
 Bundle-Vendor: com.salexandru
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -18,4 +18,4 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.resources
-Export-Package: com.salexandru.xcorex.metaAnnotation
+Export-Package: com.salexandru.xcore.metaAnnotation
