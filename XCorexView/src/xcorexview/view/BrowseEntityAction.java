@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 
 import xmetamodel.factory.FactoryMethod;
 
-import com.salexandru.xcorex.interfaces.XEntity;
+import com.salexandru.xcore.interfaces.XEntity;
 
 
 public class BrowseEntityAction implements IObjectActionDelegate {

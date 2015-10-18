@@ -2,8 +2,8 @@ package xcorexview.metrics.methods;
 
 import xmetamodel.XMethod;
 
-import com.salexandru.xcorex.interfaces.IPropertyComputer;
-import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.interfaces.IPropertyComputer;
+import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
 public class Name implements IPropertyComputer<String, XMethod> {

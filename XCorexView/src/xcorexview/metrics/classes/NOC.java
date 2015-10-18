@@ -16,8 +16,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import xmetamodel.XClass;
 
-import com.salexandru.xcorex.interfaces.IPropertyComputer;
-import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.interfaces.IPropertyComputer;
+import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
 public class NOC implements IPropertyComputer<Integer, XClass> {

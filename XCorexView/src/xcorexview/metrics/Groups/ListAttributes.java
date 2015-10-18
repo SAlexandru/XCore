@@ -10,9 +10,9 @@ import xmetamodel.XField;
 import xmetamodel.XMethod;
 import xmetamodel.factory.FactoryMethod;
 
-import com.salexandru.xcorex.interfaces.Group;
-import com.salexandru.xcorex.interfaces.IGroupBuilder;
-import com.salexandru.xcorex.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.interfaces.Group;
+import com.salexandru.xcore.interfaces.IGroupBuilder;
+import com.salexandru.xcore.metaAnnotation.GroupBuilder;
 
 @GroupBuilder
 public class ListAttributes implements IGroupBuilder<XField, XClass> {

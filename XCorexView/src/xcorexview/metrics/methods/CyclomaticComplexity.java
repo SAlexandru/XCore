@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import xmetamodel.XMethod;
 
-import com.salexandru.xcorex.interfaces.IPropertyComputer;
-import com.salexandru.xcorex.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.interfaces.IPropertyComputer;
+import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
 /**
  * 

@@ -32,8 +32,8 @@ import xmetamodel.XClass;
 import xmetamodel.XMethod;
 import xmetamodel.factory.FactoryMethod;
 
-import com.salexandru.xcorex.interfaces.Group;
-import com.salexandru.xcorex.interfaces.XEntity;
+import com.salexandru.xcore.interfaces.Group;
+import com.salexandru.xcore.interfaces.XEntity;
 
 public class XCorexTableView extends ViewPart {
 	private TableViewer viewer_;
