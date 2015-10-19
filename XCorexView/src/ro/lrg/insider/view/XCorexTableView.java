@@ -130,7 +130,7 @@ public class XCorexTableView extends ViewPart {
 					try {
 						Method met = entity.getClass().getMethod("getUnderlyingObject");
 						Object result = met.invoke(entity);
-						if (entity instanceof IJavaElement) {
+						if (result instanceof IJavaElement) {
 							JavaUI.openInEditor((IJavaElement)result, true, true);
 						}
 					}
