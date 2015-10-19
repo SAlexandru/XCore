@@ -9,10 +9,6 @@ public class XCorexLibraryAdapter extends ClasspathContainerInitializer {
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project)
 			throws CoreException {
-		
-		System.out.println(containerPath);
-		System.out.println(project);
-
 	}
 
 }
