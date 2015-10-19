@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: XCorexView
-Bundle-SymbolicName: XCorexView;singleton:=true
-Bundle-Version: 1.0.0
-Bundle-Activator: xcorexview.plugin.Activator
+Bundle-Name: Insider
+Bundle-SymbolicName: Insider;singleton:=true
+Bundle-Version: 2.0.0
+Bundle-Activator: ro.lrg.insider.plugin.Activator
 Bundle-Vendor: com.salexandru
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -19,3 +19,13 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/XCoreInterfaces_1.0.2.jar
+Export-Package: com.salexandru.xcore.interfaces,
+ com.salexandru.xcore.metaAnnotation,
+ ro.lrg.insider.view;
+  uses:="org.eclipse.ui,
+   org.eclipse.jface.action,
+   org.eclipse.jdt.core,
+   com.salexandru.xcore.interfaces,
+   org.eclipse.swt.widgets,
+   org.eclipse.jface.viewers,
+   org.eclipse.ui.part"

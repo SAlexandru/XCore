@@ -1,4 +1,4 @@
-package xcorexview.view;
+package ro.lrg.insider.view;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
@@ -28,10 +29,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
-import xmetamodel.XClass;
-import xmetamodel.XMethod;
-import xmetamodel.factory.FactoryMethod;
-
 import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.XEntity;
 
@@ -42,7 +39,7 @@ public class XCorexTableView extends ViewPart {
 	private Stack<List<String>> propertyHistory_ = new Stack<>();
 	
 	private static int MAX = 12;
-	public static String viewId = "com.salexandru.xcorexview.view.XCorexTableView";
+	public static String viewId = "ro.lrg.insider.view.XCorexTableView";
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -131,33 +128,25 @@ public class XCorexTableView extends ViewPart {
 					}
 					XEntity entity = dataHistory_.peek().get(selection);
 					try {
-						if (entity instanceof XClass) {
-							JavaUI.openInEditor(((XClass)entity).getUnderlyingObject(), true, true);
-						}
-						else if (entity instanceof XMethod) {
-							JavaUI.openInEditor(((XMethod)entity).getUnderlyingObject(), true, true);
+						Method met = entity.getClass().getMethod("getUnderlyingObject");
+						Object result = met.invoke(entity);
+						if (entity instanceof IJavaElement) {
+							JavaUI.openInEditor((IJavaElement)result, true, true);
 						}
 					}
-					catch (PartInitException | JavaModelException e1) {
+					catch (PartInitException | JavaModelException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
 						e1.printStackTrace();
 					}
 				}
 
 				@Override
-				public void mouseDown(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
+				public void mouseDown(MouseEvent e) {}
 
 				@Override
-				public void mouseUp(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
+				public void mouseUp(MouseEvent e) {}
 				
 			});
-		}
-		
+		}		
 		viewer_.refresh(true);
 	}
 	
@@ -182,14 +171,12 @@ public class XCorexTableView extends ViewPart {
 					viewer_.refresh(true);
 				}
 			}
-		});
-		
+		});		
 		mgr.add(new Action("Clear") {
 			@Override
 			public void run() {
 				dataHistory_.clear();
 				propertyHistory_.clear();
-				FactoryMethod.clearCache();
 				viewer_.getTable().removeAll();
 				viewer_.refresh();
 			}
@@ -293,7 +280,6 @@ public class XCorexTableView extends ViewPart {
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			boolean query = (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex);
-			System.out.println(columnIndex + " " + propertyHistory_.peek().size() + ": " + query);
 			return (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex) ? 
 				   "" : 
 				  applyMethod((XEntity)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();

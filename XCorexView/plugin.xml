@@ -4,9 +4,9 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="xcorexview.view.XCorexTableView"
-            id="com.salexandru.xcorexview.view.XCorexTableView"
-            name="XCorexTableView"
+            class="ro.lrg.insider.view.XCorexTableView"
+            id="ro.lrg.insider.view.XCorexTableView"
+            name="Insider"
             restorable="true">
       </view>
    </extension>
@@ -14,15 +14,14 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="false"
-            id="com.salexandru.xcorexview.view.BrowseEntity"
+            id="ro.lrg.insider.view.BrowseEntity"
             objectClass="org.eclipse.jdt.core.IJavaElement">
          <action
-               class="xcorexview.view.BrowseEntityAction"
-               id="com.salexandru.xcorexview.view.BrowseEntityAction"
-               label="Browse in XCorex"
+               class="ro.lrg.insider.view.BrowseEntityAction"
+               id="ro.lrg.insider.view.BrowseEntityAction"
+               label="Browse in Insider"
                menubarPath="addition">
          </action>
       </objectContribution>
    </extension>
-
 </plugin>
