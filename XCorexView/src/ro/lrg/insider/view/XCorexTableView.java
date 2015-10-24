@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -19,28 +16,29 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
 import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.XEntity;
 
+import ro.lrg.insider.view.ToolRegistration.XEntityEntry;
+
 public class XCorexTableView extends ViewPart {
+
+	public static final String viewId = "ro.lrg.insider.view.XCorexTableView";
+	private static final int MAX = 12;
+
 	private TableViewer viewer_;
 	private Composite parent_;
-	private Stack<List<XEntity>> dataHistory_ = new Stack<>();
+
+	private Stack<List<List<XEntityEntry>>> dataHistory_ = new Stack<>();
 	private Stack<List<String>> propertyHistory_ = new Stack<>();
-	
-	private static int MAX = 12;
-	public static String viewId = "ro.lrg.insider.view.XCorexTableView";
-	
+		
 	@Override
 	public void createPartControl(Composite parent) {
 		parent_ = parent;
@@ -81,72 +79,57 @@ public class XCorexTableView extends ViewPart {
 		viewer_.getTable().setFocus();
 	}
 	
-	public void displayEntity(XEntity entity) {
+	public void displayEntity(Object entity) {
 		try {
-			ArrayList<XEntity> data = new ArrayList<>();
+			
+			List<XEntityEntry> unifiedEntity = ToolRegistration.getInstance().toXEntity(entity);
+			if(unifiedEntity.size() == 0) { return; }
+			
+			ArrayList<List<XEntityEntry>> data = new ArrayList<>();
 			ArrayList<String> prop = new ArrayList<>();
-			data.add(entity);
-			prop.add("Name");
+			
+			data.add(unifiedEntity);
+			
+			for(XEntityEntry anUnifiedEntity : unifiedEntity) {
+				prop.add("ToString [" + anUnifiedEntity.toolName + "]");
+			}
 			
 			dataHistory_.add(data);
 			propertyHistory_.add(prop);
-			buildView();
-		}
-		catch (Throwable e) {
 			
+			buildView();
+
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 	}
 	
 	private void buildView() {
+		
 		for (int i = 0; i < MAX; ++i) {
 			viewer_.getTable().getColumn(i).setText("");
 			viewer_.getTable().getColumn(i).setWidth(100);
 		}
 				
-		XEntity entity = dataHistory_.peek().isEmpty() ? null : dataHistory_.peek().get(0);
+		List<XEntityEntry> unifiedEntity = (dataHistory_.isEmpty() || dataHistory_.peek().isEmpty()) ? null : dataHistory_.peek().get(0);
 		
-		if (null != entity) {
+		if (null != unifiedEntity) {
+			
 			int i = 0;
 			for (String property: propertyHistory_.peek()) {
 				viewer_.getTable().getColumn(i).setText(property);
 				viewer_.getTable().getColumn(i).setWidth(100);
+				i++;
 			}
 			
 			IStatusLineManager slm = getViewSite().getActionBars().getStatusLineManager();
 			slm.setMessage("No. of entities:" + (dataHistory_.isEmpty() ? 0 : dataHistory_.peek().size()));
 			viewer_.getTable().setSortColumn(null);	
 			viewer_.getTable().setSortDirection(SWT.NONE);
-			viewer_.getTable().setMenu(addMenues(entity));
+			viewer_.getTable().setMenu(addMenues(unifiedEntity));
 		
-			viewer_.getTable().addMouseListener(new MouseListener() {
-
-				@Override
-				public void mouseDoubleClick(MouseEvent e) {
-					int selection = viewer_.getTable().getSelectionIndex();
-					if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
-						return;
-					}
-					XEntity entity = dataHistory_.peek().get(selection);
-					try {
-						Method met = entity.getClass().getMethod("getUnderlyingObject");
-						Object result = met.invoke(entity);
-						if (result instanceof IJavaElement) {
-							JavaUI.openInEditor((IJavaElement)result, true, true);
-						}
-					}
-					catch (PartInitException | JavaModelException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
-						e1.printStackTrace();
-					}
-				}
-
-				@Override
-				public void mouseDown(MouseEvent e) {}
-
-				@Override
-				public void mouseUp(MouseEvent e) {}
-				
-			});
 		}		
+		
 		viewer_.refresh(true);
 	}
 	
@@ -159,109 +142,168 @@ public class XCorexTableView extends ViewPart {
 	}
 
 	private void addControlButtons() {
+		
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		
 		mgr.add(new Action("Back") {
 			@Override
 			public void run() {
-				if (!dataHistory_.isEmpty()) {
+				if (dataHistory_.size() > 1) {
 					dataHistory_.pop();
 					propertyHistory_.pop();
 					buildView();
 					viewer_.refresh(true);
 				}
 			}
-		});		
+		});
 		mgr.add(new Action("Clear") {
 			@Override
 			public void run() {
 				dataHistory_.clear();
 				propertyHistory_.clear();
+				viewer_.getTable().setMenu(null);
 				viewer_.getTable().removeAll();
-				viewer_.refresh();
+				buildView();
 			}
 		});
 	}
 	
-	private Menu addMenues(XEntity entity) {
+	private Menu addMenues(List<XEntityEntry> unifiedEntity) {
+		
 		Menu main = new Menu(parent_);
 		Menu propertyMenu = new Menu(main);
 		Menu groupMenu = new Menu(main);
+		Menu showWithMenu = new Menu(main);
 		
-		List<String> properties = getEntityProperties(entity);
-		List<String> groups = getEntityGroups(entity);
+		for(XEntityEntry anUnifiedEntityEntry : unifiedEntity) {
+
+			Menu toolProperties = new Menu(propertyMenu);
+			Menu toolGroups = new Menu(groupMenu);		
+
+			MenuItem toolPropertiesItem = new MenuItem(propertyMenu, SWT.CASCADE);
+			toolPropertiesItem.setMenu(toolProperties);
+			toolPropertiesItem.setText(anUnifiedEntityEntry.toolName);
+			
+			MenuItem toolGroupItem = new MenuItem(groupMenu, SWT.CASCADE);
+			toolGroupItem.setMenu(toolGroups);
+			toolGroupItem.setText(anUnifiedEntityEntry.toolName);
+								
+			MenuItem toolShowItem = new MenuItem(showWithMenu,SWT.NONE);		
+			toolShowItem.setText(anUnifiedEntityEntry.toolName);
+			toolShowItem.addListener(SWT.Selection, (Event e) -> {
+						int selection = viewer_.getTable().getSelectionIndex();
+						if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
+							return;
+						}
+						List<XEntityEntry> selectedUnifiedEntity = dataHistory_.peek().get(selection);
+						for(XEntityEntry anEntry : selectedUnifiedEntity) {
+							if(anEntry.toolName.equals(((MenuItem)e.widget).getText()))
+								anEntry.theConverter.show(anEntry.theEntity);
+						}
+			});
+
+			List<String> properties = getEntityProperties(anUnifiedEntityEntry.theEntity);
+			List<String> groups = getEntityGroups(anUnifiedEntityEntry.theEntity);	
+			
+			for (String property: properties) {
+				MenuItem item = new MenuItem(toolProperties, SWT.NONE);
+				item.setText(property);
+				item.addListener(SWT.Selection, (Event e) -> {
+					MenuItem menuItem = (MenuItem)e.widget;
+					String propertyNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
+					if (!propertyHistory_.peek().contains(propertyNameAndTool)) {
+						propertyHistory_.peek().add(propertyNameAndTool);
+						viewer_.getTable().getColumn(propertyHistory_.peek().size() - 1).setText(propertyNameAndTool);
+						viewer_.getTable().getColumn(propertyHistory_.peek().size()).setWidth(100);
+						viewer_.refresh(true);
+					}
+				});
+			}
+
+			for (String group: groups) {
+				MenuItem item = new MenuItem(toolGroups, SWT.NONE);
+				item.setText(group);
+				item.addListener(SWT.Selection, (Event e) -> {
+					List<XEntityEntry> element = dataHistory_.peek().get(viewer_.getTable().getSelectionIndex());
+					MenuItem menuItem = (MenuItem)e.widget;
+					String groupNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
+					@SuppressWarnings("unchecked")
+					Group<XEntity> groupElements = (Group<XEntity>)applyMethod(element, groupNameAndTool);
+					List<List<XEntityEntry>> unifiedElements = new ArrayList<>();
+					boolean first = true;
+					List<String> newProperties = new ArrayList<>();
+					for(XEntity aGroupEntity : groupElements.getElements()) {
+						try {
+							Method met = aGroupEntity.getClass().getMethod("getUnderlyingObject");
+							Object result = met.invoke(aGroupEntity);
+							List<XEntityEntry> aGroupUnifiedEntity = ToolRegistration.getInstance().toXEntity(result);
+							unifiedElements.add(aGroupUnifiedEntity);
+							if(first) {
+								first = false;
+								for(XEntityEntry aGroupUnifiedEntityEntry : aGroupUnifiedEntity) {
+									newProperties.add("ToString [" + aGroupUnifiedEntityEntry.toolName +"]");					
+								}
+							}
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					dataHistory_.push(unifiedElements);
+					propertyHistory_.push(newProperties);
+					buildView();
+				});
+			}
+
+		}
 		
 		MenuItem propertyMenuItem = new MenuItem(main, SWT.CASCADE);
 		propertyMenuItem.setMenu(propertyMenu);
 		propertyMenuItem.setText("Properties");
-		
-		for (String property: properties) {
-			MenuItem item = new MenuItem(propertyMenu, SWT.NONE);
-			item.setText(property);
-			item.addListener(SWT.Selection, (Event e) -> {
-				MenuItem menuItem = (MenuItem)e.widget;
-				if (!propertyHistory_.peek().contains(menuItem.getText())) {
-					propertyHistory_.peek().add(menuItem.getText());
-					viewer_.getTable().getColumn(propertyHistory_.peek().size() - 1).setText(menuItem.getText());
-					viewer_.getTable().getColumn(propertyHistory_.peek().size()).setWidth(100);
-					viewer_.refresh(true);
-				}
-			});
-		}
-		
+				
 		new MenuItem(main, SWT.SEPARATOR);
 		
 		MenuItem groupMenuItem = new MenuItem(main, SWT.CASCADE);
 		groupMenuItem.setMenu(groupMenu);
 		groupMenuItem.setText("Group");
-		
-		for (String group: groups) {
-			MenuItem item = new MenuItem(groupMenu, SWT.NONE);
-			item.setText(group);
-			item.addListener(SWT.Selection, (Event e) -> {
-				XEntity element = dataHistory_.peek().get(viewer_.getTable().getSelectionIndex());
-				MenuItem menuItem = (MenuItem)e.widget;
-				
-				@SuppressWarnings("unchecked")
-				Group<XEntity> groupElement = (Group<XEntity>)applyMethod(element, menuItem.getText());
-				dataHistory_.push(groupElement.getElements());
-				List<String> array = new ArrayList<>();
-				array.add("Name");
-				propertyHistory_.push(array);
-				buildView();
-			});
-		}
-		
+
+		new MenuItem(main, SWT.SEPARATOR);
+
+		MenuItem showWithItem = new MenuItem(main, SWT.CASCADE);
+		showWithItem.setMenu(showWithMenu);
+		showWithItem.setText("Show With");
+
 		return main;
 	}
 	
-	private List<String> getEntityProperties(XEntity entity) {
+	private List<String> getEntityProperties(XEntity anEntity) {
 		List<String> names = new ArrayList<>();
-		
-		for (Method m: entity.getClass().getInterfaces()[0].getDeclaredMethods()) {
+		for (Method m: anEntity.getClass().getInterfaces()[0].getDeclaredMethods()) {
 			if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
 				names.add(capitalize(m.getName()));
 			}
 		}
-		
 		return names;
 	}
 	
-	private List<String> getEntityGroups(XEntity entity) {
+	private List<String> getEntityGroups(XEntity anEntity) {
 		List<String> names = new ArrayList<>();
-		
-		for (Method m: entity.getClass().getInterfaces()[0].getDeclaredMethods()) {
+		for (Method m: anEntity.getClass().getInterfaces()[0].getDeclaredMethods()) {
 			if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
 				names.add(capitalize(m.getName()));
 			}
 		}
-		
 		return names;
 	}
 	
-	private Object applyMethod(XEntity entity, String methodName) {
+	private Object applyMethod(List<XEntityEntry> unifiedEntity, String methodNameTool) {
 		try {
-			return entity.getClass().getMethod(decapitalize(methodName)).invoke(entity);
+			String methodName = methodNameTool.substring(0,methodNameTool.indexOf('[')).trim();
+			String toolName = methodNameTool.substring(methodNameTool.indexOf('[') + 1,methodNameTool.lastIndexOf(']')).trim();
+			for(XEntityEntry anEntryEntry : unifiedEntity) {
+				if(anEntryEntry.toolName.equals(toolName)) {
+					return anEntryEntry.theEntity.getClass().getMethod(decapitalize(methodName)).invoke(anEntryEntry.theEntity);
+				}
+			}
 		} catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
@@ -277,12 +319,12 @@ public class XCorexTableView extends ViewPart {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
-			boolean query = (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex);
 			return (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex) ? 
 				   "" : 
-				  applyMethod((XEntity)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
+				  applyMethod((List<XEntityEntry>)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
 		}
 		
 	}
