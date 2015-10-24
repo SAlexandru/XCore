@@ -1,14 +1,15 @@
-package xcorexview.metrics.classes;
+package xcorexview.metrics.methods;
 
-import xmetamodel.XClass;
+import xmetamodel.XMethod;
 
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
 @PropertyComputer
-public class Name implements IPropertyComputer<String, XClass> {
+public class ToString implements IPropertyComputer<String, XMethod> {
+
 	@Override
-	public String compute(XClass entity) {
+	public String compute(XMethod entity) {
 		return entity.getUnderlyingObject().getElementName();
 	}
 }

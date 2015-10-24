@@ -24,7 +24,7 @@ public class NumberOfNullChecks implements IPropertyComputer<Integer, XMethod> {
 		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
 		
-		NodeVisitor visitor = new NodeVisitor(entity.name());
+		NodeVisitor visitor = new NodeVisitor(entity.toString());
 		astParser.createAST(null).accept(visitor);
 		
 		return visitor.getCount();

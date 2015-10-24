@@ -11,7 +11,7 @@ import com.salexandru.xcore.metaAnnotation.PropertyComputer;
  *
  */
 @PropertyComputer
-public class Name implements IPropertyComputer<String, XPackage> {
+public class ToString implements IPropertyComputer<String, XPackage> {
 	/**
 	 * 
 	 * @author SAlexandru1

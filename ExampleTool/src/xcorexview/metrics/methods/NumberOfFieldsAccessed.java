@@ -1,7 +1,5 @@
 package xcorexview.metrics.methods;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -13,7 +11,6 @@ import xmetamodel.XMethod;
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
-
 @PropertyComputer
 public class NumberOfFieldsAccessed implements IPropertyComputer <Integer, XMethod>{
 
@@ -22,7 +19,7 @@ public class NumberOfFieldsAccessed implements IPropertyComputer <Integer, XMeth
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
-		final String name = entity.name();
+		final String name = entity.toString();
 		final NodeVisitor visitor = new NodeVisitor(name);
 		astParser.createAST(null).accept(new NodeVisitor(name));
 		return visitor.getCount();

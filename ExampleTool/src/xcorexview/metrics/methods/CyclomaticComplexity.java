@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -37,7 +36,7 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 		astParser.setSource(entity.getUnderlyingObject().getCompilationUnit());
 		
 		
-		NodeVisitor visitor = new NodeVisitor(entity.name());
+		NodeVisitor visitor = new NodeVisitor(entity.toString());
 		astParser.createAST(null).accept(visitor);
 		
 		return visitor.getCount();
