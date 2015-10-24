@@ -4,7 +4,9 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            allowMultiple="false"
             class="ro.lrg.insider.view.XCorexTableView"
+            icon="res/lrglogo.png"
             id="ro.lrg.insider.view.XCorexTableView"
             name="Insider"
             restorable="true">
@@ -15,7 +17,7 @@
       <objectContribution
             adaptable="false"
             id="ro.lrg.insider.view.BrowseEntity"
-            objectClass="org.eclipse.jdt.core.IJavaElement">
+            objectClass="java.lang.Object">
          <action
                class="ro.lrg.insider.view.BrowseEntityAction"
                id="ro.lrg.insider.view.BrowseEntityAction"
