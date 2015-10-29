@@ -14,10 +14,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import xmetamodel.XClass;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XClass;
 
 @PropertyComputer
 public class NOC implements IPropertyComputer<Integer, XClass> {

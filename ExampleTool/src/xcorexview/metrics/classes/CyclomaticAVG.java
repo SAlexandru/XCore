@@ -1,10 +1,10 @@
 package xcorexview.metrics.classes;
 
-import xmetamodel.XClass;
-import xmetamodel.XMethod;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XClass;
+import exampletool.metamodel.entity.XMethod;
 
 @PropertyComputer
 public class CyclomaticAVG implements IPropertyComputer<Double, XClass>{

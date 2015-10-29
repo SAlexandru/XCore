@@ -4,13 +4,13 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import xmetamodel.XClass;
-import xmetamodel.XMethod;
-import xmetamodel.factory.FactoryMethod;
-
 import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.IGroupBuilder;
 import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+
+import exampletool.metamodel.entity.XClass;
+import exampletool.metamodel.entity.XMethod;
+import exampletool.metamodel.factory.Factory;
 
 
 @GroupBuilder
@@ -21,7 +21,7 @@ public class ListPublicMethods implements IGroupBuilder<XMethod, XClass> {
 		try {
 			for (final IMethod method: entity.getUnderlyingObject().getMethods()) {
 					if (Flags.isPublic(method.getFlags())) {
-						group_.add(FactoryMethod.createXMethod(method));
+						group_.add(Factory.getInstance().createXMethod(method));
 					}
 			}
 		} catch (JavaModelException e) {

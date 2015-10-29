@@ -15,8 +15,8 @@ import org.eclipse.ui.PartInitException;
 
 import com.salexandru.xcore.interfaces.XEntity;
 
+import exampletool.metamodel.factory.Factory;
 import ro.lrg.insider.view.ToolRegistration;
-import xmetamodel.factory.FactoryMethod;
 
 public class StartUp implements org.eclipse.ui.IStartup{
 
@@ -29,14 +29,14 @@ public class StartUp implements org.eclipse.ui.IStartup{
 						if(elem instanceof IJavaElement) {
 							IJavaElement element = (IJavaElement)elem;
 							switch (element.getElementType()) {
-								case IJavaElement.METHOD: return FactoryMethod.createXMethod((IMethod)element);
-								case IJavaElement.TYPE: return FactoryMethod.createXClass((IType)element);
+								case IJavaElement.METHOD: return Factory.getInstance().createXMethod((IMethod)element);
+								case IJavaElement.TYPE: return Factory.getInstance().createXClass((IType)element);
 								case IJavaElement.COMPILATION_UNIT:
 									ICompilationUnit unit = (ICompilationUnit)element;
-									return FactoryMethod.createXClass(unit.findPrimaryType());
+									return Factory.getInstance().createXClass(unit.findPrimaryType());
 									
-								case IJavaElement.PACKAGE_FRAGMENT: return FactoryMethod.createXPackage((IPackageFragment)element);
-								case IJavaElement.JAVA_PROJECT: return FactoryMethod.createXProject((IJavaProject)element);
+								case IJavaElement.PACKAGE_FRAGMENT: return Factory.getInstance().createXPackage((IPackageFragment)element);
+								case IJavaElement.JAVA_PROJECT: return Factory.getInstance().createXProject((IJavaProject)element);
 							}
 						}
 						return null;

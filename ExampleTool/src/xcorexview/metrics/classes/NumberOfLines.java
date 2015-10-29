@@ -4,10 +4,10 @@ import java.util.Scanner;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import xmetamodel.XClass;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XClass;
 
 
 @PropertyComputer

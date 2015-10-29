@@ -16,10 +16,10 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import xmetamodel.XMethod;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XMethod;
 
 /**
  * 

@@ -1,17 +1,15 @@
 package xcorexview.metrics.Groups;
 
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-
-import xmetamodel.XClass;
-import xmetamodel.XField;
-import xmetamodel.XMethod;
-import xmetamodel.factory.FactoryMethod;
 
 import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.IGroupBuilder;
 import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+
+import exampletool.metamodel.entity.XClass;
+import exampletool.metamodel.entity.XField;
+import exampletool.metamodel.factory.Factory;
 
 @GroupBuilder
 public class ListPublicAttributes implements IGroupBuilder<XField, XClass> {
@@ -20,7 +18,7 @@ public class ListPublicAttributes implements IGroupBuilder<XField, XClass> {
 		Group<XField> group_ = new Group<>();
 		try {
 			for (final IField field: entity.getUnderlyingObject().getFields()) {
-					group_.add(FactoryMethod.createXField(field));
+					group_.add(Factory.getInstance().createXField(field));
 			}
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block

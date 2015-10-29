@@ -5,13 +5,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import xmetamodel.XPackage;
-import xmetamodel.XProject;
-import xmetamodel.factory.FactoryMethod;
-
 import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.IGroupBuilder;
 import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+
+import exampletool.metamodel.entity.XPackage;
+import exampletool.metamodel.entity.XProject;
+import exampletool.metamodel.factory.Factory;
 
 @GroupBuilder
 public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
@@ -52,7 +52,7 @@ public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
 			}
 			
 			if (isValid(fragment)) {
-				group_.add(FactoryMethod.createXPackage(fragment));
+				group_.add(Factory.getInstance().createXPackage(fragment));
 			}
 			
 			if (fragment.hasSubpackages()) {

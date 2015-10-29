@@ -3,10 +3,10 @@ package xcorexview.metrics.methods;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.JavaModelException;
 
-import xmetamodel.XMethod;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XMethod;
 
 
 @PropertyComputer

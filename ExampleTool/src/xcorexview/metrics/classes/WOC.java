@@ -1,12 +1,9 @@
 package xcorexview.metrics.classes;
 
-
-
-import xmetamodel.XClass;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 
+import exampletool.metamodel.entity.XClass;
 
 @PropertyComputer
 public class WOC implements IPropertyComputer<Double, XClass> {

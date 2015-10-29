@@ -1,9 +1,9 @@
 package xcorexview.metrics.packages;
 
-import xmetamodel.XPackage;
-
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+
+import exampletool.metamodel.entity.XPackage;
 
 /**
  * 
