@@ -10,13 +10,14 @@ import javax.lang.model.util.Elements;
 
 import com.salexandru.xcore.interfaces.IPropertyComputer;
 
-public class XComputer {
+public class XPropertyComputerGenerator {
+	
 	private TypeElement  computer_;
 	private TypeMirror   entityType_;
 	private TypeMirror   returnType_;
 	private Elements     utils_;
 
-	public XComputer(TypeElement computer, DeclaredType returnType) {
+	public XPropertyComputerGenerator(TypeElement computer, DeclaredType returnType) {
 		if (null == computer || null == returnType) {
 			throw new NullPointerException();
 		}
@@ -24,12 +25,12 @@ public class XComputer {
 		returnType_ = returnType;
 	}
 	
-	public XComputer(TypeElement computer, Elements utils) {
+	public XPropertyComputerGenerator(TypeElement computer, Elements utils) {
 		this(computer);
 		utils_ = utils;
 	}
 
-	public XComputer(TypeElement computer) {
+	public XPropertyComputerGenerator(TypeElement computer) {
 		if (null == computer) {
 			throw new NullPointerException("Invalid (Null) computer!");
 		}

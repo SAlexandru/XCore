@@ -21,27 +21,25 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.osgi.service.prefs.BackingStoreException;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.salexandru.codeGeneration.XComputer;
-import com.salexandru.codeGeneration.XGroupBuilder;
-import com.salexandru.codeGeneration.XPropertyComputer;
-import com.salexandru.codeGeneration.XPropertyGenarator;
+import com.salexandru.codeGeneration.XPropertyComputerGenerator;
+import com.salexandru.codeGeneration.XGroupBuilderGenerator;
+import com.salexandru.codeGeneration.XMetaModelEntityGenerator;
+import com.salexandru.codeGeneration.XGenarator;
 import com.salexandru.xcore.metaAnnotation.GroupBuilder;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class XAnnotationProcessor extends AbstractProcessor {
+	
 	private Set<String> supportedAnnotations_;
-	private XPropertyGenarator xProperties_;
+	private XGenarator generator_;
 	
 	public XAnnotationProcessor() {
 		super();
-		xProperties_ = new XPropertyGenarator();
 		supportedAnnotations_ = new HashSet<>();
 		supportedAnnotations_.add(PropertyComputer.class.getCanonicalName());
 		supportedAnnotations_.add(GroupBuilder.class.getCanonicalName());
@@ -71,8 +69,44 @@ public class XAnnotationProcessor extends AbstractProcessor {
 	public void printError(String msg) {
 		processingEnv.getMessager().printMessage(Kind.ERROR, msg);
 	}
+		
+	@Override
+	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+		IJavaProject jProject = getJavaProject();
+
+		generator_ = new XGenarator(jProject.getElementName().toLowerCase() + ".metamodel");
+
+		if (roundEnv.processingOver()) {
+			return true;
+		}
+		
+		processPropertyComputer(roundEnv);
+		processGroupBuilder(roundEnv);
 	
-	public IJavaProject getJavaProject() {
+		if (null != jProject) {
+			XCorePropertyStore prop = new XCorePropertyStore(jProject);
+			for (XMetaModelEntityGenerator p: generator_.getEntities()) {
+				if(prop.getUnderlyingMetaType(p.getName()) == null) {
+					prop.setDefaultBindings(p.getName());
+				}
+				p.setExtendedMetaType(prop.getExtendedMetaType(p.getName()));
+				p.setUnderlyingMetaType(prop.getUnderlyingMetaType(p.getName()));
+			}
+			prop.doSave();
+		}
+		
+		try {
+			generator_.generate(processingEnv.getFiler());
+		}
+		catch (IOException e) {
+			printError(e.getMessage());
+		}
+		
+		return true;
+	}
+	
+	private IJavaProject getJavaProject() {
 		try {
 			JavaFileObject jObj = processingEnv.getFiler().createSourceFile("CorexToTest");
 			IWorkspace workspace= ResourcesPlugin.getWorkspace();    
@@ -85,44 +119,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 		}
 		return null;
 	}
-	
-	@Override
-	public boolean process(Set<? extends TypeElement> annotations,
-			RoundEnvironment roundEnv) {
-		if (roundEnv.processingOver()) {
-			return true;
-		}
-		processPropertyComputer(roundEnv);
-		processGroupBuilder(roundEnv);
-	
-		IJavaProject jProject = getJavaProject();
-		if (null != jProject) {
-			IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(jProject.getElementName());
-			for (XPropertyComputer p: xProperties_.getPropertyComputers()) {
-				p.setUnderlyingType(pref.get(p.getName(), "Object"));
-				if (null == pref.get(p.getName(), null)) {
-					try {
-						pref.put(p.getName(), "Object");
-						pref.flush();
-					}
-				    catch (BackingStoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		
-		try {
-			xProperties_.generate(processingEnv.getFiler());
-		}
-		catch (IOException e) {
-			printError (e.getMessage());
-		}
-		
-		return true;
-	}
-	
+
 	private void processPropertyComputer(RoundEnvironment env) {
 		for (Element elem: env.getElementsAnnotatedWith(PropertyComputer.class)) {
 			if (ElementKind.CLASS != elem.getKind()) {
@@ -140,10 +137,10 @@ public class XAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				try {
-					XComputer computer = new XComputer(tElem);
+					XPropertyComputerGenerator computer = new XPropertyComputerGenerator(tElem);
 					processingEnv.getElementUtils().getDocComment(tElem.getEnclosingElement());
 					computer.setElementUtils(processingEnv.getElementUtils());
-					xProperties_.createPropertyComputer(computer.getEntityType()).addComputer(computer);
+					generator_.createEntity(computer.getEntityType()).addComputer(computer);
 				}
 				catch (NullPointerException | IllegalArgumentException e) {
 					printError (elem, e.getMessage());
@@ -171,10 +168,10 @@ public class XAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				try {
-					XGroupBuilder gb = new XGroupBuilder ((TypeElement)elem);
+					XGroupBuilderGenerator gb = new XGroupBuilderGenerator ((TypeElement)elem);
 					gb.setElementUtils(processingEnv.getElementUtils());
-					xProperties_.createPropertyComputer(gb.getEntityType()).addGroupBuilder(gb);
-					xProperties_.createPropertyComputer(gb.getElementType());
+					generator_.createEntity(gb.getEntityType()).addGroupBuilder(gb);
+					generator_.createEntity(gb.getElementType());
 				}
 				catch (IllegalArgumentException e) {
 					printError (elem, e.getMessage());

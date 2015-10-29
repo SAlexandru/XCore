@@ -5,20 +5,22 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
+import com.salexandru.xcore.interfaces.Group;
 import com.salexandru.xcore.interfaces.IGroupBuilder;
 
-public class XGroupBuilder {
+public class XGroupBuilderGenerator {
+	
 	private TypeElement builder_;
 	private DeclaredType entityType_;
 	private DeclaredType elementType_;
 	private Elements     utils_;
 	
-	public XGroupBuilder (TypeElement builder, Elements utils) {
+	public XGroupBuilderGenerator (TypeElement builder, Elements utils) {
 		this(builder);
 		utils_ = utils;
 	}
 		
-	public XGroupBuilder (TypeElement builder) {
+	public XGroupBuilderGenerator (TypeElement builder) {
 		if (null == builder) {
 			throw new NullPointerException();
 		}
@@ -69,7 +71,7 @@ public class XGroupBuilder {
 			}
 		}
 		
-		return doc + String.format("Group<%s> %s();", elementType_.asElement().getSimpleName(), 
+		return doc + String.format(Group.class.getCanonicalName()+"<%s> %s();\n", elementType_.asElement().getSimpleName(), 
 					  							       getCamelCaseName());
 	}
 	
@@ -82,7 +84,7 @@ public class XGroupBuilder {
 				doc.append("\n*/\n");
 			}
 		}
-		return doc + String.format("public Group<%s> %s() {\n  return %s.buildGroup(this);\n}", 
+		return doc + String.format("public " + Group.class.getCanonicalName() + "<%s> %s() {\n  return %s.buildGroup(this);\n}", 
 							  elementType_.asElement().getSimpleName(), 
 							   getCamelCaseName(),
 							   instanceName

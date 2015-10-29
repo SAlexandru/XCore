@@ -11,7 +11,7 @@
        point="org.eclipse.ui.propertyPages">
     <page
           class="com.salexandru.xcore.preferencepage.XCorexPropertyPage"
-          id="com.salexandru.xcore.XCorexPropertyPage"
+          id="com.salexandru.xcore.XCorePropertyPage"
           name="XCore"
           objectClass="org.eclipse.jdt.core.IJavaProject">
     </page>

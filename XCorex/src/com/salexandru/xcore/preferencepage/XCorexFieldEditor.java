@@ -1,728 +1,262 @@
 package com.salexandru.xcore.preferencepage;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import java.util.HashSet;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
-import org.osgi.service.prefs.BackingStoreException;
 
-/**
- * An abstract field editor that manages a table_ of input values. The editor
- * displays a table_ containing the rows of values, buttons for adding,
- * duplicating and removing rows and buttons to adjust the order of rows in the
- * table_. The table_ also allows in-place editing of values.
- * 
- * <p>
- * Subclasses must implement the <code>parseString</code>,
- * <code>createList</code>, and <code>getNewInputObject</code> framework
- * methods.
- * </p>
- * 
- * @author Sandip V. Chitale
- * 
- * @since 1.0.54
- */
+import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
+
 public class XCorexFieldEditor extends FieldEditor {
-	/**
-	 * The table_ widget; <code>null</code> if none (before creation or after
-	 * disposal).
-	 */
-	private Table table_;
 
-	/**
-	 * The button box containing the Add, Remove, Up, and Down buttons;
-	 * <code>null</code> if none (before creation or after disposal).
-	 */
-	private Composite buttonBox_;
+	private IJavaProject thePrj;
+	private Table table;
+	private Combo extendedMetaModelField;
+	private HashSet<String> toRemoveName = new HashSet<String>();
 
-	/**
-	 * The Add button.
-	 */
-	private Button addButton_;
-
-	private Button editButton_;
-
-	/**
-	 * The Remove button.
-	 */
-	private Button removeButton_;
-
-	/**
-	 * The Up button.
-	 */
-	private Button upButton_;
-
-	/**
-	 * The Down button.
-	 */
-	private Button downButton_;
-
-	private final String[] columnNames_;
-	private final int[] columnWidths_;
-
-	/**
-	 * The selection listener.
-	 */
-	private SelectionListener selectionListener_;
-
-	private Composite parent_;
-
-	private IJavaProject jProject_;
-
-	private IEclipsePreferences pref_;
-
-	/**
-	 * Creates a table_ field editor.
-	 * 
-	 * @param name
-	 *            the name of the preference this field editor works on
-	 * @param labelText
-	 *            the label text of the field editor
-	 * @param columnNames__
-	 *            the names of columns
-	 * @param columnWidths_
-	 *            the widths of columns
-	 * @param parent
-	 *            the parent of the field editor's control
-	 * 
-	 */
-	public XCorexFieldEditor(IJavaProject project, Composite parent) {
-		columnNames_ = new String[] { "Corex Types", "Java Concrete Type" };
-		columnWidths_ = new int[] {150, 150};
-		parent_ = parent;
-		jProject_ = project;
-		pref_ = InstanceScope.INSTANCE.getNode(jProject_.getElementName());
-		init("Corex Bindings",
-				"Define the type of the underlying object for the corex meta-type. Makes things type-safer ;)");
-		createControl(parent_);
-		initTable();
+	public XCorexFieldEditor(IJavaProject theProject, Composite parent) {
+		thePrj = theProject;
+		createControl(parent);
 	}
 
-	private void initTable() {
-		Table table_ = getTableControl(parent_);
-		try {
-			for (String key : pref_.keys()) {
-				String value = pref_.get(key, "Object");
-				TableItem item = new TableItem(table_, SWT.NONE);
-				item.setText(new String[] { key, value });
-			}
-		} catch (BackingStoreException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Combines the given list of items into a single string. This method is the
-	 * converse of <code>parseString</code>.
-	 * <p>
-	 * Subclasses must implement this method.
-	 * </p>
-	 * 
-	 * @param items
-	 *            the list of items
-	 * @return the combined string
-	 * @see #parseString
-	 */
-	protected String createList(String[][] items) {
-		StringBuffer sb = new StringBuffer();
-
-		for (String[] rows : items) {
-			for (String item : rows) {
-				sb.append(item);
-				sb.append(',');
-			}
-			sb.append('/');
-		}
-
-		return sb.toString();
-	}
-
-	/**
-	 * Splits the given string into a array of array of value. This method is
-	 * the converse of <code>createList</code>.
-	 * <p>
-	 * Subclasses must implement this method.
-	 * </p>
-	 * 
-	 * @param string
-	 *            the string
-	 * @return an array of array of <code>string</code>
-	 * @see #createList
-	 */
-	protected String[][] parseString(String string) {
-		String[] rows = string.split("/");
-		String[][] items = new String[rows.length][];
-
-		for (int i = 0; i < items.length; ++i) {
-			items[i] = rows[i].split(",");
-		}
-
-		return items;
-	}
-
-	/**
-	 * Creates and returns a new value row for the table_.
-	 * <p>
-	 * Subclasses must implement this method.
-	 * </p>
-	 * 
-	 * @return a new item
-	 */
-	protected String[] getNewInputObject() {
-		MyDialog d = new MyDialog(parent_.getShell(), jProject_);
-		d.open();
-		if (null != d.getData()) {
-			pref_.put(d.getCorexType(), d.getJavaType());
-			try {
-				pref_.flush();
-			} catch (BackingStoreException e) {
-				e.printStackTrace();
-			}
-		}
-		return d.getData();
-	}
-
-	protected String[] getChangedInputObject(TableItem item) {
-		MyDialog d = new MyDialog(parent_.getShell(), jProject_);
-		d.setCorexType(item.getText(0));
-		d.setJavaType(item.getText(1));
-		d.open();
-		if (null != d.getData()) {
-			pref_.remove(item.getText(0));
-			pref_.put(d.getCorexType(), d.getJavaType());
-			try {
-				pref_.flush();
-			} catch (BackingStoreException e) {
-				e.printStackTrace();
-			}
-		}
-		return d.getData();
-	}
-
-	/**
-	 * Creates the Add, Remove, Up, and Down button in the given button box.
-	 * 
-	 * @param box
-	 *            the box for the buttons
-	 */
-	private void createButtons(Composite box) {
-		addButton_ = createPushButton(box, "New");
-		editButton_ = createPushButton(box, "Edit");
-		removeButton_ = createPushButton(box, "Remove");
-		upButton_ = createPushButton(box, "Up");
-		downButton_ = createPushButton(box, "Down");
-	}
-
-	/**
-	 * Return the Add button.
-	 * 
-	 * @return the button
-	 */
-	protected Button getAddButton() {
-		return addButton_;
-	}
-
-	/**
-	 * Return the Edit button.
-	 * 
-	 * @return the button
-	 */
-	protected Button getEditButton() {
-		return editButton_;
-	}
-
-	/**
-	 * Return the Remove button.
-	 * 
-	 * @return the button
-	 */
-	protected Button getRemoveButton() {
-		return removeButton_;
-	}
-
-	/**
-	 * Return the Up button.
-	 * 
-	 * @return the button
-	 */
-	protected Button getUpButton() {
-		return upButton_;
-	}
-
-	/**
-	 * Return the Down button.
-	 * 
-	 * @return the button
-	 */
-	protected Button getDownButton() {
-		return downButton_;
-	}
-
-	/**
-	 * Helper method to create a push button.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 * @param key
-	 *            the resource name used to supply the button's label text
-	 * @return Button
-	 */
-	private Button createPushButton(Composite parent, String key) {
-		Button button = new Button(parent, SWT.PUSH);
-		button.setText(key);
-		button.setFont(parent.getFont());
-		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		int widthHint = convertHorizontalDLUsToPixels(button,
-				IDialogConstants.BUTTON_WIDTH);
-		data.widthHint = Math.max(widthHint,
-				button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
-		button.setLayoutData(data);
-		button.addSelectionListener(getSelectionListener());
-		return button;
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	protected void adjustForNumColumns(int numColumns) {
-		Control control = getLabelControl();
-		((GridData) control.getLayoutData()).horizontalSpan = numColumns;
-		((GridData) table_.getLayoutData()).horizontalSpan = numColumns - 1;
-	}
-
-	/**
-	 * Creates a selection listener.
-	 */
-	public void createSelectionListener() {
-		selectionListener_ = new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				Widget widget = event.widget;
-				if (widget == addButton_) {
-					addPressed();
-				} else if (widget == editButton_) {
-					editPressed();
-				} else if (widget == removeButton_) {
-					removePressed();
-				} else if (widget == upButton_) {
-					upPressed();
-				} else if (widget == downButton_) {
-					downPressed();
-				} else if (widget == table_) {
-					selectionChanged();
-				}
-			}
-		};
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	protected void doFillIntoGrid(Composite parent, int numColumns) {
-		Control control = getLabelControl(parent);
-		GridData gd = new GridData();
-		gd.horizontalSpan = numColumns;
-		control.setLayoutData(gd);
-
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridData gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		gridData.horizontalSpan = 2;
-		gridData.widthHint = 550;
-		composite.setLayoutData(gridData);
-		composite.setLayout(new GridLayout(2, false));
-
-		table_ = getTableControl(composite);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalAlignment = GridData.FILL;
-		gd.horizontalSpan = numColumns - 1;
-		gd.grabExcessHorizontalSpace = true;
-		table_.setLayoutData(gd);
-
-		buttonBox_ = getButtonBoxControl(composite);
-		gd = new GridData();
-		gd.verticalAlignment = GridData.BEGINNING;
-		buttonBox_.setLayoutData(gd);
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	protected void doLoad() {
-		if (table_ != null) {
-			String s = getPreferenceStore().getString(getPreferenceName());
-			String[][] array = parseString(s);
-			for (int i = 0; i < array.length; i++) {
-				TableItem table_Item = new TableItem(table_, SWT.NONE);
-				table_Item.setText(array[i]);
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	protected void doLoadDefault() {
-		if (table_ != null) {
-			table_.removeAll();
-			String s = getPreferenceStore().getDefaultString(
-					getPreferenceName());
-			String[][] array = parseString(s);
-			for (int i = 0; i < array.length; i++) {
-				TableItem table_Item = new TableItem(table_, SWT.NONE);
-				for (int j = 0; j < array[i].length; j++) {
-					table_Item.setText(array[i][j]);
-				}
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	protected void doStore() {
-		TableItem[] items = table_.getItems();
-		String[][] commands = new String[items.length][];
-		for (int i = 0; i < items.length; i++) {
-			commands[i] = new String[columnNames_.length];
-			TableItem item = items[i];
-			for (int j = 0; j < columnNames_.length; j++) {
-				commands[i][j] = item.getText(j);
-			}
-		}
-		String s = createList(commands);
-		if (s != null) {
-			getPreferenceStore().setValue(getPreferenceName(), s);
-		}
-	}
-
-	/**
-	 * Returns this field editor's button box containing the Add, Remove, Up,
-	 * and Down button.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 * @return the button box
-	 */
-	public Composite getButtonBoxControl(Composite parent) {
-		if (buttonBox_ == null) {
-			buttonBox_ = new Composite(parent, SWT.NULL);
-			GridLayout layout = new GridLayout();
-			layout.marginWidth = 0;
-			buttonBox_.setLayout(layout);
-			createButtons(buttonBox_);
-			buttonBox_.addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent event) {
-					addButton_ = null;
-					editButton_ = null;
-					removeButton_ = null;
-					upButton_ = null;
-					downButton_ = null;
-					buttonBox_ = null;
-				}
-			});
-
-		} else {
-			checkParent(buttonBox_, parent);
-		}
-
-		selectionChanged();
-		return buttonBox_;
-	}
-
-	/**
-	 * Returns this field editor's table_ control.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 * @return the table_ control
-	 */
-	public Table getTableControl(Composite parent) {
-		if (table_ == null) {
-			table_ = new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL
-					| SWT.H_SCROLL | SWT.FULL_SELECTION);
-			table_.setFont(parent.getFont());
-			table_.setLinesVisible(true);
-			table_.setHeaderVisible(true);
-			table_.addSelectionListener(getSelectionListener());
-			table_.addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent event) {
-					table_ = null;
-				}
-			});
-			for (String columnName : columnNames_) {
-				TableColumn table_Column = new TableColumn(table_, SWT.LEAD);
-				table_Column.setText(columnName);
-				table_Column.setWidth(100);
-			}
-			if (columnNames_.length > 0) {
-				TableLayout layout = new TableLayout();
-				if (columnNames_.length > 1) {
-					for (int i = 0; i < (columnNames_.length - 1); i++) {
-						layout.addColumnData(new ColumnWeightData(0,
-								columnWidths_[i], false));
-
-					}
-				}
-				layout.addColumnData(new ColumnWeightData(100,
-						columnWidths_[columnNames_.length - 1], true));
-				table_.setLayout(layout);
-			}
-			final TableEditor editor = new TableEditor(table_);
-			editor.horizontalAlignment = SWT.LEFT;
-			editor.grabHorizontal = true;
-			table_.addListener(SWT.MouseDoubleClick, new Listener() {
-				public void handleEvent(Event event) {
-					Rectangle clientArea = table_.getClientArea();
-					Point pt = new Point(event.x, event.y);
-					int index = table_.getTopIndex();
-					while (index < table_.getItemCount()) {
-						boolean visible = false;
-						final TableItem item = table_.getItem(index);
-						for (int i = 0; i < table_.getColumnCount(); i++) {
-							Rectangle rect = item.getBounds(i);
-							if (rect.contains(pt)) {
-								final int column = i;
-								final Text text = new Text(table_, SWT.NONE);
-								Listener textListener = new Listener() {
-									public void handleEvent(final Event e) {
-										switch (e.type) {
-										case SWT.FocusOut:
-											item.setText(column, text.getText());
-											text.dispose();
-											break;
-										case SWT.Traverse:
-											switch (e.detail) {
-											case SWT.TRAVERSE_RETURN:
-												item.setText(column,
-														text.getText());
-												// FALL THROUGH
-											case SWT.TRAVERSE_ESCAPE:
-												text.dispose();
-												e.doit = false;
-											}
-											break;
-										}
-									}
-								};
-								text.addListener(SWT.FocusOut, textListener);
-								text.addListener(SWT.Traverse, textListener);
-								editor.setEditor(text, item, i);
-								text.setText(item.getText(i));
-								text.selectAll();
-								text.setFocus();
-								return;
-							}
-							if (!visible && rect.intersects(clientArea)) {
-								visible = true;
-							}
-						}
-						if (!visible)
-							return;
-						index++;
-					}
-				}
-			});
-		} else {
-			//checkParent(table_, parent);
-		}
-		return table_;
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
+	@Override
 	public int getNumberOfControls() {
 		return 2;
 	}
 
-	/**
-	 * Returns this field editor's selection listener. The listener is created
-	 * if necessary.
-	 * 
-	 * @return the selection listener
-	 */
-	private SelectionListener getSelectionListener() {
-		if (selectionListener_ == null) {
-			createSelectionListener();
-		}
-		return selectionListener_;
-	}
-
-	/**
-	 * Returns this field editor's shell.
-	 * <p>
-	 * This method is internal to the framework; subclassers should not call
-	 * this method.
-	 * </p>
-	 * 
-	 * @return the shell
-	 */
-	protected Shell getShell() {
-		if (addButton_ == null) {
-			return null;
-		}
-		return addButton_.getShell();
-	}
-
-	/**
-	 * Notifies that the Add button has been pressed.
-	 */
-	private void addPressed() {
-		setPresentsDefaultValue(false);
-		String[] newInputObject = getNewInputObject();
-		if (null != newInputObject) {
-			TableItem table_Item = new TableItem(table_, SWT.NONE);
-			table_Item.setText(newInputObject);
-		}
-		selectionChanged();
-	}
-
-	/**
-	 * Notifies that the Add button has been pressed.
-	 */
-	private void editPressed() {
-		setPresentsDefaultValue(false);
-		int index = table_.getSelectionIndex();
-		TableItem item = table_.getItem(index);
+	@Override
+	protected void doFillIntoGrid(Composite parent, int numColumns) {
 		
-		String[] data = getChangedInputObject(item);
-		
-		if (null != data) {
-			item.setText(data);
+		GridData tmp;
+				
+		Label extendedMMGroup = new Label(parent, SWT.NONE);
+		extendedMMGroup.setText("Extended meta-model");
+		tmp = new GridData();
+		tmp.horizontalSpan = 2;
+		extendedMMGroup.setLayoutData(tmp);
+		Label extendedMetaModelLocationLable = new Label(parent, SWT.NONE);
+		extendedMetaModelLocationLable.setText("Package location:");
+		extendedMetaModelField = new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		extendedMetaModelField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		try {
+			for(IPackageFragmentRoot pfr : thePrj.getAllPackageFragmentRoots()) {
+				for(IJavaElement jepf : pfr.getChildren()) {
+					if(jepf.getElementName().startsWith(thePrj.getElementName().toLowerCase())) continue;
+					IPackageFragment pf = (IPackageFragment)jepf;
+					boolean pfOK = false;
+					nextUnit:for(ICompilationUnit cu : pf.getCompilationUnits()) {
+						pfOK = true;
+						for(IType type : cu.getAllTypes()) {
+							boolean typeOK = false;
+							for(String aninterf : type.getSuperInterfaceNames()) {
+								String[][] resolvedInterface = type.resolveType(aninterf);
+								if(resolvedInterface != null && resolvedInterface.length == 1 && (resolvedInterface[0][0]+"."+resolvedInterface[0][1]).equals(XEntity.class.getCanonicalName())) {
+									typeOK = true;
+								}
+							}
+							if(!typeOK) {
+								pfOK = false;
+								break nextUnit;
+							}
+						}
+					}
+					if(pfOK) {
+						extendedMetaModelField.add(pf.getElementName());
+					}
+				}
+			}
+		} catch (JavaModelException e1) {
+			e1.printStackTrace();
 		}
 		
-		selectionChanged();
+		Label underlyingMMGroup = new Label(parent, SWT.NONE);
+		underlyingMMGroup.setText("Underlying meta-model");
+		tmp = new GridData();
+		tmp.horizontalSpan = 2;
+		underlyingMMGroup.setLayoutData(tmp);
+		Composite panel = new Composite(parent, SWT.NONE);
+		panel.setLayout(new GridLayout());
+		Button underlyingMetaModelEdit = new Button(panel, SWT.PUSH);
+		underlyingMetaModelEdit.setText("Edit");
+		underlyingMetaModelEdit.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Button underlyingMetaModelRemove = new Button(panel, SWT.PUSH);
+		underlyingMetaModelRemove.setText("Remove");
+		underlyingMetaModelRemove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		table= new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		TableColumn t1 = new TableColumn(table, SWT.LEAD);
+		t1.setText("XCore meta-type");
+		t1.setResizable(true);
+		TableColumn t2 = new TableColumn(table, SWT.LEAD);
+		t2.setText("Underlying meta-type");
+		t2.setResizable(true);
+		TableColumn t3 = new TableColumn(table, SWT.LEAD);
+		t3.setText("Extended meta-type");
+		t3.setResizable(true);
+		TableLayout table_layout = new TableLayout();
+		table.setLayout(table_layout);
+		table_layout.addColumnData(new ColumnWeightData(0,100));
+		table_layout.addColumnData(new ColumnWeightData(0,200));
+		table_layout.addColumnData(new ColumnWeightData(0,200));
+
+		underlyingMetaModelEdit.addSelectionListener(new SelectionListener() {			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] var = table.getSelection();
+				if(var.length > 0) {
+					if(!var[0].getText(2).equals(XEntity.class.getCanonicalName())) {
+				  		MessageBox msb = new MessageBox(parent.getShell(), SWT.ICON_ERROR);
+				  		msb.setMessage("The meta-type" + var[0].getText(1) + " cannot be edited because it extends another meta-type i.e., "  + var[0].getText(2));
+				  		msb.open();						
+						return;
+					}
+					MetaTypePropertyDialog d = new MetaTypePropertyDialog(null, thePrj);
+					d.setXCoreMetaType(var[0].getText(0));
+					d.setUnderlyingMetaType(var[0].getText(1));
+					d.open();
+					if(d.getReturnCode() == Window.OK) {
+						var[0].setText(d.getData());				
+					}
+				}
+			}	
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+
+		extendedMetaModelField.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(((Combo)e.widget).getText() != null && !((Combo)e.widget).getText().isEmpty()) {
+					String pack = ((Combo)e.widget).getText();
+					XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
+					String[][] underlayingMappings = pp.toMatrix();
+					for(String[] aMetaTypeEntry : underlayingMappings){
+						try {
+							IType t = thePrj.findType(pack + "." + aMetaTypeEntry[0]);
+							if(t != null) {
+								for(IMethod am : t.getMethods()) {
+									if(am.getElementName().equals("getUnderlyingObject")) {
+										pp.setBindings(aMetaTypeEntry[0], Signature.toString(Signature.getReturnType(am.getSignature())), t.getFullyQualifiedName());
+									}
+								}
+							}
+						} catch (JavaModelException e1) {
+							e1.printStackTrace();
+						}
+					}				
+				}
+				doLoad();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		
+		parent.addControlListener(new ControlListener() {		
+			@Override
+			public void controlResized(ControlEvent e) {
+				parent.pack();
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent e) {}
+		});
+		
+		underlyingMetaModelRemove.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] var = table.getSelection();
+				if(var.length > 0) {
+					toRemoveName.add(var[0].getText(0));
+					table.remove(table.getSelectionIndices());
+				}
+			}			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		parent.pack();
 	}
 
-	/**
-	 * Notifies that the Remove button has been pressed.
-	 */
-	private void removePressed() {
-		setPresentsDefaultValue(false);
-		int index = table_.getSelectionIndex();
-		if (index >= 0) {
-			try {
-				pref_.remove(table_.getItem(index).getText(0));
-				pref_.flush();
+	@Override
+	protected void doLoad() {
+		toRemoveName.clear();
+		table.removeAll();
+		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
+		String[][] mappings = pp.toMatrix();
+		for(int i = 0; i < mappings.length; i++) {
+			TableItem ti = new TableItem(table, SWT.NONE);
+			ti.setText(mappings[i]);
+			if(!mappings[i][2].equals(XEntity.class.getCanonicalName())) {
+				String txt = mappings[i][2];
+				txt = txt.substring(0, txt.lastIndexOf('.'));
+				extendedMetaModelField.setText(txt);
 			}
-			catch (BackingStoreException e) {
-				e.printStackTrace();
-			}
-			table_.remove(index);
-			selectionChanged();
 		}
 	}
 
-	/**
-	 * Notifies that the Up button has been pressed.
-	 */
-	private void upPressed() {
-		swap(true);
+	@Override
+	protected void doLoadDefault() {
+		toRemoveName.clear();
+		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
+		for(int i = 0; i < table.getItemCount(); i++) {
+			pp.setToDefault(table.getItem(i).getText(0));
+		}		
+		doLoad();
+		extendedMetaModelField.deselectAll();
 	}
 
-	/**
-	 * Notifies that the Down button has been pressed.
-	 */
-	private void downPressed() {
-		swap(false);
-	}
-
-	/**
-	 * Invoked when the selection in the list has changed.
-	 * 
-	 * <p>
-	 * The default implementation of this method utilizes the selection index
-	 * and the size of the list to toggle the enabled state of the up, down and
-	 * remove buttons.
-	 * </p>
-	 * 
-	 * <p>
-	 * Subclasses may override.
-	 * </p>
-	 * 
-	 */
-	protected void selectionChanged() {
-		int index = table_.getSelectionIndex();
-		int size = table_.getItemCount();
-
-		editButton_.setEnabled(index >= 0 && index < size);
-		removeButton_.setEnabled(index >= 0);
-		upButton_.setEnabled(size > 1 && index > 0);
-		downButton_.setEnabled(size > 1 && index >= 0 && index < size - 1);
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on FieldEditor.
-	 */
-	public void setFocus() {
-		if (table_ != null) {
-			table_.setFocus();
+	@Override
+	protected void doStore() {
+		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
+		for(int i = 0; i < table.getItemCount(); i++) {
+			pp.setBindings(table.getItem(i).getText(0), table.getItem(i).getText(1), pp.getExtendedMetaType(table.getItem(i).getText(0)));
 		}
 	}
 
-	/**
-	 * Moves the currently selected item up or down.
-	 * 
-	 * @param up
-	 *            <code>true</code> if the item should move up, and
-	 *            <code>false</code> if it should move down
-	 */
-	private void swap(boolean up) {
-		setPresentsDefaultValue(false);
-		int index = table_.getSelectionIndex();
-		int target = up ? index - 1 : index + 1;
-
-		if (index >= 0) {
-			TableItem[] selection = table_.getSelection();
-			Assert.isTrue(selection.length == 1);
-			String[] values = new String[columnNames_.length];
-			for (int j = 0; j < columnNames_.length; j++) {
-				values[j] = selection[0].getText(j);
-			}
-			table_.remove(index);
-			TableItem table_Item = new TableItem(table_, SWT.NONE, target);
-			table_Item.setText(values);
-			table_.setSelection(target);
-		}
-		selectionChanged();
+	@Override
+	public void store() {
+		doStore();
+		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
+		pp.doSave(toRemoveName);
 	}
 
-	/*
-	 * @see FieldEditor.setEnabled(boolean,Composite).
-	 */
-	public void setEnabled(boolean enabled, Composite parent) {
-		super.setEnabled(enabled, parent);
-		getTableControl(parent).setEnabled(enabled);
-		addButton_.setEnabled(enabled);
-		editButton_.setEnabled(enabled);
-		removeButton_.setEnabled(enabled);
-		upButton_.setEnabled(enabled);
-		downButton_.setEnabled(enabled);
+	@Override
+	protected void adjustForNumColumns(int numColumns) {
+		return;
 	}
-
+	
 }
