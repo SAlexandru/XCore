@@ -3,7 +3,9 @@ package ro.lrg.insider.view;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.jface.action.Action;
@@ -277,9 +279,11 @@ public class XCorexTableView extends ViewPart {
 	
 	private List<String> getEntityProperties(XEntity anEntity) {
 		List<String> names = new ArrayList<>();
-		for (Method m: anEntity.getClass().getInterfaces()[0].getDeclaredMethods()) {
-			if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
-				names.add(capitalize(m.getName()));
+		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
+			for (Method m: anInterface.getDeclaredMethods()) {
+				if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
+					names.add(capitalize(m.getName()));
+				}
 			}
 		}
 		return names;
@@ -287,9 +291,11 @@ public class XCorexTableView extends ViewPart {
 	
 	private List<String> getEntityGroups(XEntity anEntity) {
 		List<String> names = new ArrayList<>();
-		for (Method m: anEntity.getClass().getInterfaces()[0].getDeclaredMethods()) {
-			if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
-				names.add(capitalize(m.getName()));
+		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
+			for (Method m: anInterface.getMethods()) {
+				if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
+					names.add(capitalize(m.getName()));
+				}
 			}
 		}
 		return names;
@@ -327,6 +333,18 @@ public class XCorexTableView extends ViewPart {
 				  applyMethod((List<XEntityEntry>)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
 		}
 		
+	}
+	
+	private Set<Class<?>> getAllInterfaces(Class<?> aClass) {
+		HashSet<Class<?>> res = new HashSet<Class<?>>();
+		if(aClass != null) {
+			for(Class<?> anInterface : aClass.getInterfaces()) {
+				res.add(anInterface);
+				res.addAll(getAllInterfaces(anInterface));
+			}
+			res.addAll(getAllInterfaces(aClass.getSuperclass()));
+		}
+		return res;
 	}
 	
 }
