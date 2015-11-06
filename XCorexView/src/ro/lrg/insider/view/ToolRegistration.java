@@ -21,8 +21,6 @@ public class ToolRegistration {
 			
 		public void show(XEntity theEntity);
 		
-		public String getToolName();
-		
 	}
 	
 	private ArrayList<XEntityConverter> converters = new ArrayList<>();
@@ -33,12 +31,10 @@ public class ToolRegistration {
 
 	class XEntityEntry {
 
-		String toolName;		
 		XEntity theEntity;
 		XEntityConverter theConverter;
 
-		XEntityEntry(String toolName, XEntity anEntity, XEntityConverter theConverter) {
-			this.toolName = toolName;
+		XEntityEntry(XEntity anEntity, XEntityConverter theConverter) {
 			this.theEntity = anEntity;
 			this.theConverter = theConverter;
 		}
@@ -50,8 +46,7 @@ public class ToolRegistration {
 		for(XEntityConverter aConv : converters) {
 			XEntity anEntity = aConv.convert(element);
 			if(anEntity != null) {
-				String toolName = aConv.getToolName();
-				res.add(new XEntityEntry(toolName,anEntity,aConv));
+				res.add(new XEntityEntry(anEntity,aConv));
 			}
 		}
 		return res;
