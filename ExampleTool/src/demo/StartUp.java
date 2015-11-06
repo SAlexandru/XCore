@@ -43,11 +43,6 @@ public class StartUp implements org.eclipse.ui.IStartup{
 					}
 					
 					@Override
-					public String getToolName() {
-						return "Example Tool";
-					}
-					
-					@Override
 					public void show(XEntity theEntity) {
 						try {
 							Method met = theEntity.getClass().getMethod("getUnderlyingObject");

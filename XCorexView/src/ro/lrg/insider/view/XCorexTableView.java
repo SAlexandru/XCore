@@ -3,8 +3,10 @@ package ro.lrg.insider.view;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -41,6 +43,8 @@ public class XCorexTableView extends ViewPart {
 	private Stack<List<List<XEntityEntry>>> dataHistory_ = new Stack<>();
 	private Stack<List<String>> propertyHistory_ = new Stack<>();
 		
+	private Map<String, Integer> prop2Pos = new HashMap<>();
+
 	@Override
 	public void createPartControl(Composite parent) {
 		parent_ = parent;
@@ -91,9 +95,11 @@ public class XCorexTableView extends ViewPart {
 			ArrayList<String> prop = new ArrayList<>();
 			
 			data.add(unifiedEntity);
-			
-			for(XEntityEntry anUnifiedEntity : unifiedEntity) {
-				prop.add("ToString [" + anUnifiedEntity.toolName + "]");
+
+			Set<String> allTools = getAllTools(unifiedEntity);
+			for(String aToolName : allTools) {
+				if(!prop.contains("ToString [" + aToolName + "]"))
+					prop.add("ToString [" + aToolName + "]");
 			}
 			
 			dataHistory_.add(data);
@@ -130,7 +136,7 @@ public class XCorexTableView extends ViewPart {
 			viewer_.getTable().setSortDirection(SWT.NONE);
 			viewer_.getTable().setMenu(addMenues(unifiedEntity));
 		
-		}		
+		}
 		
 		viewer_.refresh(true);
 	}
@@ -176,40 +182,19 @@ public class XCorexTableView extends ViewPart {
 		Menu propertyMenu = new Menu(main);
 		Menu groupMenu = new Menu(main);
 		Menu showWithMenu = new Menu(main);
+
+		prop2Pos.clear();
+		Map<String, List<String>> allProperties = getAllProperties(unifiedEntity,prop2Pos);
+		Map<String, List<String>> allGroups = getAllGroups(unifiedEntity,prop2Pos);
 		
-		for(XEntityEntry anUnifiedEntityEntry : unifiedEntity) {
-
-			Menu toolProperties = new Menu(propertyMenu);
-			Menu toolGroups = new Menu(groupMenu);		
-
+		for(String aToolName : allProperties.keySet()) {
+			Menu aToolProperties = new Menu(propertyMenu);
 			MenuItem toolPropertiesItem = new MenuItem(propertyMenu, SWT.CASCADE);
-			toolPropertiesItem.setMenu(toolProperties);
-			toolPropertiesItem.setText(anUnifiedEntityEntry.toolName);
-			
-			MenuItem toolGroupItem = new MenuItem(groupMenu, SWT.CASCADE);
-			toolGroupItem.setMenu(toolGroups);
-			toolGroupItem.setText(anUnifiedEntityEntry.toolName);
-								
-			MenuItem toolShowItem = new MenuItem(showWithMenu,SWT.NONE);		
-			toolShowItem.setText(anUnifiedEntityEntry.toolName);
-			toolShowItem.addListener(SWT.Selection, (Event e) -> {
-						int selection = viewer_.getTable().getSelectionIndex();
-						if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
-							return;
-						}
-						List<XEntityEntry> selectedUnifiedEntity = dataHistory_.peek().get(selection);
-						for(XEntityEntry anEntry : selectedUnifiedEntity) {
-							if(anEntry.toolName.equals(((MenuItem)e.widget).getText()))
-								anEntry.theConverter.show(anEntry.theEntity);
-						}
-			});
-
-			List<String> properties = getEntityProperties(anUnifiedEntityEntry.theEntity);
-			List<String> groups = getEntityGroups(anUnifiedEntityEntry.theEntity);	
-			
-			for (String property: properties) {
-				MenuItem item = new MenuItem(toolProperties, SWT.NONE);
-				item.setText(property);
+			toolPropertiesItem.setMenu(aToolProperties);
+			toolPropertiesItem.setText(aToolName);
+			for (String aProperty: allProperties.get(aToolName)) {
+				MenuItem item = new MenuItem(aToolProperties, SWT.NONE);
+				item.setText(aProperty);
 				item.addListener(SWT.Selection, (Event e) -> {
 					MenuItem menuItem = (MenuItem)e.widget;
 					String propertyNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
@@ -221,29 +206,37 @@ public class XCorexTableView extends ViewPart {
 					}
 				});
 			}
-
-			for (String group: groups) {
-				MenuItem item = new MenuItem(toolGroups, SWT.NONE);
-				item.setText(group);
+		}
+		
+		for(String aToolName : allGroups.keySet()) {
+			Menu aToolGroups = new Menu(groupMenu);		
+			MenuItem toolGroupItem = new MenuItem(groupMenu, SWT.CASCADE);
+			toolGroupItem.setMenu(aToolGroups);
+			toolGroupItem.setText(aToolName);
+			for (String aGroup: allGroups.get(aToolName)) {
+				MenuItem item = new MenuItem(aToolGroups, SWT.NONE);
+				item.setText(aGroup);
 				item.addListener(SWT.Selection, (Event e) -> {
 					List<XEntityEntry> element = dataHistory_.peek().get(viewer_.getTable().getSelectionIndex());
 					MenuItem menuItem = (MenuItem)e.widget;
 					String groupNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
 					@SuppressWarnings("unchecked")
-					Group<XEntity> groupElements = (Group<XEntity>)applyMethod(element, groupNameAndTool);
+					Group<XEntity> resultedGroup = (Group<XEntity>)applyMethod(element, groupNameAndTool);
 					List<List<XEntityEntry>> unifiedElements = new ArrayList<>();
 					boolean first = true;
-					List<String> newProperties = new ArrayList<>();
-					for(XEntity aGroupEntity : groupElements.getElements()) {
+					List<String> resultProperties = new ArrayList<>();
+					for(XEntity aResultedEntity : resultedGroup.getElements()) {
 						try {
-							Method met = aGroupEntity.getClass().getMethod("getUnderlyingObject");
-							Object result = met.invoke(aGroupEntity);
-							List<XEntityEntry> aGroupUnifiedEntity = ToolRegistration.getInstance().toXEntity(result);
-							unifiedElements.add(aGroupUnifiedEntity);
+							Method met = aResultedEntity.getClass().getMethod("getUnderlyingObject");
+							Object result = met.invoke(aResultedEntity);
+							List<XEntityEntry> aResultedUnifiedEntity = ToolRegistration.getInstance().toXEntity(result);
+							unifiedElements.add(aResultedUnifiedEntity);
 							if(first) {
 								first = false;
-								for(XEntityEntry aGroupUnifiedEntityEntry : aGroupUnifiedEntity) {
-									newProperties.add("ToString [" + aGroupUnifiedEntityEntry.toolName +"]");					
+								Set<String> allTools = getAllTools(aResultedUnifiedEntity);
+								for(String aToolNameInResults : allTools) {
+									if(!resultProperties.contains("ToString [" + aToolNameInResults + "]"))
+										resultProperties.add("ToString [" + aToolNameInResults + "]");
 								}
 							}
 						} catch (Exception e1) {
@@ -251,13 +244,30 @@ public class XCorexTableView extends ViewPart {
 						}
 					}
 					dataHistory_.push(unifiedElements);
-					propertyHistory_.push(newProperties);
+					propertyHistory_.push(resultProperties);
 					buildView();
 				});
 			}
-
 		}
 		
+		for(String aToolName : getAllTools(unifiedEntity)) {
+			MenuItem toolShowItem = new MenuItem(showWithMenu,SWT.NONE);		
+			toolShowItem.setText(aToolName);
+			toolShowItem.addListener(SWT.Selection, (Event e) -> {
+				int selection = viewer_.getTable().getSelectionIndex();
+				if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
+					return;
+				}
+				List<XEntityEntry> selectedUnifiedEntity = dataHistory_.peek().get(selection);
+				for(XEntityEntry anEntry : selectedUnifiedEntity) {
+					if(getEntityTools(anEntry.theEntity).contains(aToolName)) {
+						anEntry.theConverter.show(anEntry.theEntity);
+						break;
+					}
+				}
+			});
+		}
+
 		MenuItem propertyMenuItem = new MenuItem(main, SWT.CASCADE);
 		propertyMenuItem.setMenu(propertyMenu);
 		propertyMenuItem.setText("Properties");
@@ -276,40 +286,114 @@ public class XCorexTableView extends ViewPart {
 
 		return main;
 	}
+
+	private Map<String,List<String>> getAllProperties(List<XEntityEntry> unifiedEntity, Map<String, Integer> crossReference) {
+		Map<String,List<String>> allProperties = new HashMap<String,List<String>>();
+		for(int i = 0; i < unifiedEntity.size(); i++) {
+			XEntityEntry anUnifiedEntityEntry = unifiedEntity.get(i);
+			Map<String, List<String>> properties = getEntityProperties(anUnifiedEntityEntry.theEntity);
+			for(String aTool : properties.keySet()) {
+				if(allProperties.containsKey(aTool)) {
+					allProperties.get(aTool).addAll(properties.get(aTool));
+				} else {
+					allProperties.put(aTool,properties.get(aTool));
+				}
+				if(crossReference != null) {
+					for(String aProp : allProperties.get(aTool))
+						crossReference.put(aTool + "/" + aProp, i);
+					if(!allProperties.get(aTool).contains("ToString")) {
+						crossReference.put(aTool + "/" + "ToString", i);
+					}
+				}
+			}
+		}
+		return allProperties;
+	}
+
+	private Map<String,List<String>> getAllGroups(List<XEntityEntry> unifiedEntity, Map<String, Integer> crossReference) {
+		Map<String,List<String>> allGroups = new HashMap<String,List<String>>();
+		for(int i = 0; i < unifiedEntity.size(); i++) {
+			XEntityEntry anUnifiedEntityEntry = unifiedEntity.get(i);
+			Map<String, List<String>> groups = getEntityGroups(anUnifiedEntityEntry.theEntity);
+			for(String aToolName : groups.keySet()) {
+				if(allGroups.containsKey(aToolName)) {
+					allGroups.get(aToolName).addAll(groups.get(aToolName));
+				} else {
+					allGroups.put(aToolName,groups.get(aToolName));
+				}
+				if(crossReference != null) {
+					for(String aGroup : allGroups.get(aToolName))
+						crossReference.put(aToolName + "/" + aGroup, i);
+				}
+			}
+		}
+		return allGroups;
+	}
+
+	private Set<String> getAllTools(List<XEntityEntry> unifiedEntity) {
+		HashSet<String> res = new HashSet<>();		
+		res.addAll(getAllProperties(unifiedEntity,null).keySet());
+		res.addAll(getAllGroups(unifiedEntity,null).keySet());
+		return res;
+	}
+
+	private Set<String> getEntityTools(XEntity anEntity) {
+		HashSet<String> res = new HashSet<>();		
+		res.addAll(getEntityProperties(anEntity).keySet());
+		res.addAll(getEntityGroups(anEntity).keySet());
+		return res;
+	}
 	
-	private List<String> getEntityProperties(XEntity anEntity) {
-		List<String> names = new ArrayList<>();
+	private Map<String,List<String>> getEntityProperties(XEntity anEntity) {
+		Map<String,List<String>> names = new HashMap<String,List<String>>();
 		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
+			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
 			for (Method m: anInterface.getDeclaredMethods()) {
 				if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
-					names.add(capitalize(m.getName()));
+					if(!names.containsKey(toolName)) {
+						names.put(toolName, new ArrayList<String>());
+					}
+					names.get(toolName).add(capitalize(m.getName()));
 				}
 			}
 		}
 		return names;
 	}
 	
-	private List<String> getEntityGroups(XEntity anEntity) {
-		List<String> names = new ArrayList<>();
+	private Map<String,List<String>> getEntityGroups(XEntity anEntity) {
+		Map<String,List<String>> names = new HashMap<String,List<String>>();
 		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
-			for (Method m: anInterface.getMethods()) {
+			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
+			for (Method m: anInterface.getDeclaredMethods()) {
 				if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
-					names.add(capitalize(m.getName()));
+					if(!names.containsKey(toolName)) {
+						names.put(toolName, new ArrayList<String>());
+					}
+					names.get(toolName).add(capitalize(m.getName()));
 				}
 			}
 		}
 		return names;
 	}
 	
+	private Set<Class<?>> getAllInterfaces(Class<?> aClass) {
+		HashSet<Class<?>> res = new HashSet<Class<?>>();
+		if(aClass != null) {
+			for(Class<?> anInterface : aClass.getInterfaces()) {
+				res.add(anInterface);
+				res.addAll(getAllInterfaces(anInterface));
+			}
+			res.addAll(getAllInterfaces(aClass.getSuperclass()));
+		}
+		return res;
+	}
+
 	private Object applyMethod(List<XEntityEntry> unifiedEntity, String methodNameTool) {
 		try {
-			String methodName = methodNameTool.substring(0,methodNameTool.indexOf('[')).trim();
-			String toolName = methodNameTool.substring(methodNameTool.indexOf('[') + 1,methodNameTool.lastIndexOf(']')).trim();
-			for(XEntityEntry anEntryEntry : unifiedEntity) {
-				if(anEntryEntry.toolName.equals(toolName)) {
-					return anEntryEntry.theEntity.getClass().getMethod(decapitalize(methodName)).invoke(anEntryEntry.theEntity);
-				}
-			}
+			String aMethod = methodNameTool.substring(0,methodNameTool.indexOf('[')).trim();
+			String aTool = methodNameTool.substring(methodNameTool.indexOf('[') + 1,methodNameTool.lastIndexOf(']')).trim();
+			int pos = prop2Pos.get(aTool + "/" + aMethod);
+			return unifiedEntity.get(pos).theEntity.getClass().getMethod(decapitalize(aMethod)).invoke(unifiedEntity.get(pos).theEntity);
 		} catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
@@ -330,21 +414,9 @@ public class XCorexTableView extends ViewPart {
 		public String getColumnText(Object element, int columnIndex) {
 			return (propertyHistory_.isEmpty() || propertyHistory_.peek().size() <= columnIndex) ? 
 				   "" : 
-				  applyMethod((List<XEntityEntry>)element, decapitalize(propertyHistory_.peek().get(columnIndex))).toString();
+				  applyMethod((List<XEntityEntry>)element, propertyHistory_.peek().get(columnIndex)).toString();
 		}
 		
 	}
-	
-	private Set<Class<?>> getAllInterfaces(Class<?> aClass) {
-		HashSet<Class<?>> res = new HashSet<Class<?>>();
-		if(aClass != null) {
-			for(Class<?> anInterface : aClass.getInterfaces()) {
-				res.add(anInterface);
-				res.addAll(getAllInterfaces(anInterface));
-			}
-			res.addAll(getAllInterfaces(aClass.getSuperclass()));
-		}
-		return res;
-	}
-	
+		
 }
