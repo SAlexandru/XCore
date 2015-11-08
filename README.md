@@ -1,4 +1,4 @@
-### XCore
+# XCore
 ##A Tool for the Development of Software Analysis Tools
 
 ### Copyright and license
