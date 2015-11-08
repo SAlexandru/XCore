@@ -1,5 +1,5 @@
 ## XCore
-A Tool for Software Analysis Tool Development
+A Tool for the Development of Software Analysis Tools
 
 ## Copyright and license
 
