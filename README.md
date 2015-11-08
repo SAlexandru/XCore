@@ -6,4 +6,5 @@ Copyright and license
 Code and documentation copyright 2015 Alexandru Stefanica. Code released under [the MIT license](https://github.com/SAlexandru/Corex/blob/master/Licence). Docs released under [Creative Commons](https://github.com/SAlexandru/Corex/blob/master/Licence).
 
 Documentation
-Go to the Wiki page
+
+Go to the [Wiki page](https://github.com/SAlexandru/XCore/wiki)
