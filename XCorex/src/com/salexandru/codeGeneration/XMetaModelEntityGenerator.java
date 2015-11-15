@@ -136,13 +136,14 @@ public class XMetaModelEntityGenerator {
 		s.append("           return false;\n");
 		s.append("        }\n");
 		s.append("        " + getName() + "Impl" + " iObj = (" + getName() + "Impl" + ")obj;\n");
-		s.append("        if (null == underlyingObj_ || null == iObj.getUnderlyingObject()) {\n");
-		s.append("           return true;\n");
-		s.append("        }\n");
-		s.append("        return underlyingObj_.equals(iObj);\n");
+		s.append("        return underlyingObj_.equals(iObj.underlyingObj_);\n");
+		s.append("    }\n");
+		
+		s.append("    public int hashCode() {\n");
+		s.append("        return 97 * underlyingObj_.hashCode();\n");
 		s.append("    }\n");
 		s.append("}\n");
-		
+
 		return s.toString();
 	}
 	
