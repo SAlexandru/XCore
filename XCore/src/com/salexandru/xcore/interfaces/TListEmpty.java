@@ -1,6 +1,6 @@
 package com.salexandru.xcore.interfaces;
 
-public final class TListEmpty implements ITList {
+public final class TListEmpty implements IHList {
 	
 	private static TListEmpty instance = null; 
 	

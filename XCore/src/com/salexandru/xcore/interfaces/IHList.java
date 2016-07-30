@@ -1,3 +1,3 @@
 package com.salexandru.xcore.interfaces;
 
-interface ITList {}
+interface IHList {}
