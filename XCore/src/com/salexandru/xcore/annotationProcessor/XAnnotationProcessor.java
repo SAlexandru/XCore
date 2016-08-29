@@ -27,7 +27,9 @@ import org.eclipse.jdt.core.JavaCore;
 import com.salexandru.codeGeneration.XPropertyComputerGenerator;
 import com.salexandru.codeGeneration.XGroupBuilderGenerator;
 import com.salexandru.codeGeneration.XMetaModelEntityGenerator;
+import com.salexandru.codeGeneration.XActionPreformerGenerator;
 import com.salexandru.codeGeneration.XGenarator;
+import com.salexandru.xcore.metaAnnotation.ActionPerformer;
 import com.salexandru.xcore.metaAnnotation.GroupBuilder;
 import com.salexandru.xcore.metaAnnotation.PropertyComputer;
 import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
@@ -43,6 +45,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 		supportedAnnotations_ = new HashSet<>();
 		supportedAnnotations_.add(PropertyComputer.class.getCanonicalName());
 		supportedAnnotations_.add(GroupBuilder.class.getCanonicalName());
+		supportedAnnotations_.add(ActionPerformer.class.getCanonicalName());
 	}
 	
 	@Override
@@ -83,6 +86,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 		
 		processPropertyComputer(roundEnv);
 		processGroupBuilder(roundEnv);
+		processActionPerform(roundEnv);
 	
 		if (null != jProject) {
 			XCorePropertyStore prop = new XCorePropertyStore(jProject);
@@ -106,6 +110,37 @@ public class XAnnotationProcessor extends AbstractProcessor {
 		return true;
 	}
 	
+	private void processActionPerform(RoundEnvironment env) {
+		for (Element elem: env.getElementsAnnotatedWith(ActionPerformer.class)) {
+			if (ElementKind.CLASS != elem.getKind()) {
+				printError (elem, "@ActionPerformer must annotate classes!");
+			}
+			else {
+				TypeElement tElem = (TypeElement)elem;
+				
+				if (tElem.getSimpleName().equals(tElem.getQualifiedName())) {
+					printError (elem, "Class must be in a named package not in the default one!");
+				}
+				else if (!hasDefaultConstructor(tElem)) {
+					printError (elem, "The class must have a default constructor!");
+				}
+				else {
+					try {
+						XActionPreformerGenerator gen = new XActionPreformerGenerator(tElem);
+						processingEnv.getElementUtils().getDocComment(tElem.getEnclosingElement());
+						gen.setElementUtils(processingEnv.getElementUtils());
+						generator_.createEntity(gen.getEntityType()).addActionPerformer(gen);
+					}
+					catch (NullPointerException | IllegalArgumentException e) {
+						printError(elem, e.getMessage());
+					}
+				}
+				
+			}
+		}
+		
+	}
+
 	private IJavaProject getJavaProject() {
 		try {
 			JavaFileObject jObj = processingEnv.getFiler().createSourceFile("CorexToTest");

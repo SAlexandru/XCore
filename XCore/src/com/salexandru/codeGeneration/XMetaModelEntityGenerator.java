@@ -13,6 +13,7 @@ public class XMetaModelEntityGenerator {
 	
 	private List<XPropertyComputerGenerator> computers_;
 	private List<XGroupBuilderGenerator> groupBuilders_;
+	private List<XActionPreformerGenerator> actionPerformers_;
 	
 	private String underlyingType_;
 	private String extendedMetaType;
@@ -27,6 +28,7 @@ public class XMetaModelEntityGenerator {
 		propertie_ = propertie;
 		computers_ = new ArrayList<>();
 		groupBuilders_ = new ArrayList<>();
+		actionPerformers_ = new ArrayList<>();
 		this.entity_package = entity_package;
 		this.impl_package = impl_package;
 	}
@@ -168,6 +170,10 @@ public class XMetaModelEntityGenerator {
 
 	public boolean isExtension() {
 		return !extendedMetaType.equals(XEntity.class.getCanonicalName());
+	}
+
+	public void addActionPerformer(XActionPreformerGenerator gen) {
+		actionPerformers_.add(gen);
 	}
 
 }
