@@ -2,15 +2,14 @@ package com.salexandru.xcore.interfaces;
 
 public final class TListEmpty implements IHList {
 	
-	private static TListEmpty instance = null; 
+	private static final class TListEmptyInstace {
+		public static final TListEmpty instance = new TListEmpty(); 
+	}
 	
 	private TListEmpty() {}
 	
 	public static TListEmpty getInstance() {
-		if(instance == null) {
-			instance = new TListEmpty(); 
-		}
-		return instance;
+		return TListEmptyInstace.instance;
 	}
 	
 }
