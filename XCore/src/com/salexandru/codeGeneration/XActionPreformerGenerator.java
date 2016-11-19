@@ -11,7 +11,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
-
 import com.salexandru.xcore.interfaces.IActionPerformer;
 import com.salexandru.xcore.interfaces.TListEmpty;
 
@@ -59,7 +58,9 @@ public class XActionPreformerGenerator {
 			List<? extends TypeMirror> types = t.getTypeArguments();
 			
 			if (2 == types.size()) {
-				typeNames.add(types.get(0).toString());
+				String type = types.get(0).toString();
+				
+				typeNames.add(type);
 				
 				if (!types.get(1).toString().equals(TListEmpty.class.getCanonicalName())) {
 				  typeNames.addAll(types.get(1).accept(new ExtractHList(), null));
@@ -93,6 +94,15 @@ public class XActionPreformerGenerator {
 	public DeclaredType  getEntityType()  {return entityType_;}
 	public List<String>  getArgumentTypes() {return Collections.unmodifiableList(argumentTypes_);}
 	
+	private String returnTypeAsString() {
+		String t = returnType_.toString();
+		
+		if (Void.class.getName().equals(t) || Void.class.getCanonicalName().equals(t)) {
+			t = "void";
+		}
+		
+		return t;
+	}
 
 	public String generateSignature() {
 		StringBuilder doc = new StringBuilder("");
@@ -114,7 +124,7 @@ public class XActionPreformerGenerator {
 		   }
 		}
 		
-		return doc + String.format("public %s %s (%s);\n", returnType_, getCamelCaseName(), builder);
+		return doc + String.format("public %s %s (%s);\n", returnTypeAsString(), getCamelCaseName(), builder);
 	}
 	
 	public String generateImpl(String instanceName) {
@@ -129,29 +139,49 @@ public class XActionPreformerGenerator {
 		
 		StringBuilder builder = new StringBuilder(), arguments = new StringBuilder();
 		builder.append("new HList<>(");
-		for (int i = 1; i < argumentTypes_.size(); ++i) {
-		   builder.append("args" + (i - 1) + ",");	
-		   builder.append("new HList<>(");
-		}
-		builder.append("args" + (argumentTypes_.size() - 1) + "," + TListEmpty.class.getCanonicalName() + ".getInstance()");
-		for (int i = 0; i < argumentTypes_.size(); ++i) {
-			builder.append(")");
-		}
 		
-		int argsIdx = 0;
-		for (String type: argumentTypes_) {
-			arguments.append(type + " args" + argsIdx);
-			++argsIdx;
-			if (argsIdx < argumentTypes_.size()) {
-				arguments.append(',');
+		String t = returnTypeAsString();
+		String returnOrNot = "void".equals(t) ? "" : "return";
+		
+		if (argumentTypes_.isEmpty()) {
+			return doc + String.format(
+					"\tpublic %s %s() {\n\t\t%s %s.performAction(this, %s.getInstance());\n\t}", 
+					returnTypeAsString(), 
+					getCamelCaseName(),
+					returnOrNot,
+					instanceName,
+					TListEmpty.class.getCanonicalName()
+				   );
+		}
+		else {
+			for (int i = 1; i < argumentTypes_.size(); ++i) {
+			   builder.append("args" + (i - 1) + ",");	
+			   builder.append("new HList<>(");
+			}
+			
+			
+			builder.append("args" + (argumentTypes_.size() - 1) + "," + TListEmpty.class.getCanonicalName() + ".getInstance()");
+			
+			for (int i = 0; i < argumentTypes_.size(); ++i) {
+				builder.append(")");
+			}
+			
+			int argsIdx = 0;
+			for (String type: argumentTypes_) {
+				arguments.append(type + " args" + argsIdx);
+				++argsIdx;
+				if (argsIdx < argumentTypes_.size()) {
+					arguments.append(',');
+				}
 			}
 		}
 		
 		return doc + String.format(
-				"\tpublic %s %s(%s) {\n\t\treturn %s.performAction(this, %s);\n\t}", 
-				returnType_, 
+				"\tpublic %s %s(%s) {\n\t\t%s %s.performAction(this, %s);\n\t}", 
+				returnTypeAsString(), 
 				getCamelCaseName(),
 				arguments,
+				returnOrNot,
 				instanceName,
 				builder 
 			   );
