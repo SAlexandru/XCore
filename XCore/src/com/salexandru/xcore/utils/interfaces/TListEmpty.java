@@ -1,4 +1,4 @@
-package com.salexandru.xcore.interfaces;
+package com.salexandru.xcore.utils.interfaces;
 
 public final class TListEmpty implements IHList {
 	

@@ -9,9 +9,9 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.lang.model.type.TypeMirror;
 
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
-public class XGenarator {
+public class XCodeGenerator {
 	
 	private final String entity_package;
 	private final String impl_package;
@@ -20,7 +20,7 @@ public class XGenarator {
 	private Map<String, XMetaModelEntityGenerator> entities_;
 	private String theBasePackage;
 	
-	public XGenarator(String theBasePackage) {
+	public XCodeGenerator(String theBasePackage) {
 		entities_ = new HashMap<>();
 		this.theBasePackage = theBasePackage;
 		entity_package = theBasePackage + ".entity";

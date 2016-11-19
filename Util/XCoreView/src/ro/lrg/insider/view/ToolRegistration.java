@@ -3,7 +3,7 @@ package ro.lrg.insider.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class ToolRegistration {
 

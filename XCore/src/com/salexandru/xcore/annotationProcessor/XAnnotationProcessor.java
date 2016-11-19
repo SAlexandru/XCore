@@ -25,20 +25,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.salexandru.codeGeneration.XPropertyComputerGenerator;
-import com.salexandru.codeGeneration.XGroupBuilderGenerator;
+import com.salexandru.codeGeneration.XRelationBuilder;
 import com.salexandru.codeGeneration.XMetaModelEntityGenerator;
 import com.salexandru.codeGeneration.XActionPreformerGenerator;
-import com.salexandru.codeGeneration.XGenarator;
-import com.salexandru.xcore.metaAnnotation.ActionPerformer;
-import com.salexandru.xcore.metaAnnotation.GroupBuilder;
-import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+import com.salexandru.codeGeneration.XCodeGenerator;
 import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
+import com.salexandru.xcore.utils.metaAnnotation.ActionPerformer;
+import com.salexandru.xcore.utils.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class XAnnotationProcessor extends AbstractProcessor {
 	
 	private Set<String> supportedAnnotations_;
-	private XGenarator generator_;
+	private XCodeGenerator generator_;
 	
 	public XAnnotationProcessor() {
 		super();
@@ -78,8 +78,8 @@ public class XAnnotationProcessor extends AbstractProcessor {
 
 		IJavaProject jProject = getJavaProject();
 
-		generator_ = new XGenarator(jProject.getElementName().toLowerCase() + ".metamodel");
-
+		generator_ = new XCodeGenerator(jProject.getElementName().toLowerCase() + ".metamodel");
+		
 		if (roundEnv.processingOver()) {
 			return true;
 		}
@@ -203,7 +203,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 					continue;
 				}
 				try {
-					XGroupBuilderGenerator gb = new XGroupBuilderGenerator ((TypeElement)elem);
+					XRelationBuilder gb = new XRelationBuilder ((TypeElement)elem);
 					gb.setElementUtils(processingEnv.getElementUtils());
 					generator_.createEntity(gb.getEntityType()).addGroupBuilder(gb);
 					generator_.createEntity(gb.getElementType());

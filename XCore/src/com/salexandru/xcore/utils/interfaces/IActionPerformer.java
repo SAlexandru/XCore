@@ -1,4 +1,4 @@
-package com.salexandru.xcore.interfaces;
+package com.salexandru.xcore.utils.interfaces;
 
 public interface IActionPerformer <ReturnType, Entity extends XEntity, ArgTypeList extends IHList> {
 

@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.salexandru.xcore.interfaces.XEntity;
 import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class XCorexFieldEditor extends FieldEditor {
 

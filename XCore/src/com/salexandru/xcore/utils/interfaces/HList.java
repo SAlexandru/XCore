@@ -1,4 +1,4 @@
-package com.salexandru.xcore.interfaces;
+package com.salexandru.xcore.utils.interfaces;
 
 public final class HList<HeadType,TailType extends IHList> implements IHList {
 

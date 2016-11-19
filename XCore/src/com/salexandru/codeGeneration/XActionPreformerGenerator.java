@@ -11,8 +11,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
-import com.salexandru.xcore.interfaces.IActionPerformer;
-import com.salexandru.xcore.interfaces.TListEmpty;
+import com.salexandru.xcore.utils.interfaces.IActionPerformer;
+import com.salexandru.xcore.utils.interfaces.TListEmpty;
 
 
 public class XActionPreformerGenerator {
@@ -124,7 +124,7 @@ public class XActionPreformerGenerator {
 		   }
 		}
 		
-		return doc + String.format("public %s %s (%s);\n", returnTypeAsString(), getCamelCaseName(), builder);
+		return doc + String.format("@ThisIsAnAction public %s %s (%s);\n", returnTypeAsString(), getCamelCaseName(), builder);
 	}
 	
 	public String generateImpl(String instanceName) {
@@ -145,7 +145,7 @@ public class XActionPreformerGenerator {
 		
 		if (argumentTypes_.isEmpty()) {
 			return doc + String.format(
-					"\tpublic %s %s() {\n\t\t%s %s.performAction(this, %s.getInstance());\n\t}", 
+					"\t@ThisIsAnAction public %s %s() {\n\t\t%s %s.performAction(this, %s.getInstance());\n\t}", 
 					returnTypeAsString(), 
 					getCamelCaseName(),
 					returnOrNot,
@@ -177,7 +177,7 @@ public class XActionPreformerGenerator {
 		}
 		
 		return doc + String.format(
-				"\tpublic %s %s(%s) {\n\t\t%s %s.performAction(this, %s);\n\t}", 
+				"\t@ThisIsAnAction public %s %s(%s) {\n\t\t%s %s.performAction(this, %s);\n\t}", 
 				returnTypeAsString(), 
 				getCamelCaseName(),
 				arguments,

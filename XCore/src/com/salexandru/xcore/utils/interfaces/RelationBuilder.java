@@ -1,13 +1,13 @@
-package com.salexandru.xcore.interfaces;
+package com.salexandru.xcore.utils.interfaces;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Group <T extends XEntity> {
+public class RelationBuilder <T extends XEntity> {
 	private List<T> elements_;
 	
-	public Group() {
+	public RelationBuilder() {
 		elements_ = new ArrayList<>();
 	}
 	

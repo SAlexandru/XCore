@@ -8,7 +8,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
-import com.salexandru.xcore.interfaces.IPropertyComputer;
+import com.salexandru.xcore.utils.interfaces.IPropertyComputer;
 
 public class XPropertyComputerGenerator {
 	
@@ -80,7 +80,7 @@ public class XPropertyComputerGenerator {
 			}
 		}
 		
-		return doc + "public " + returnType_ + " " + getCamelCaseName() + "();\n";
+		return doc + "@ThisIsAProperty public " + returnType_ + " " + getCamelCaseName() + "();\n";
 	}
 	
 	public String generateImpl(String instanceName) {
@@ -93,7 +93,7 @@ public class XPropertyComputerGenerator {
 				doc.append("\n*/\n");
 			}
 		}
-		impl.append(doc + "public " + returnType_ + " " + getCamelCaseName() + "() {\n");
+		impl.append(doc + "@ThisIsAProperty public " + returnType_ + " " + getCamelCaseName() + "() {\n");
 		impl.append("    return " + instanceName + ".compute(this);\n");
 		impl.append("}\n");
 		return impl.toString();

@@ -1,9 +1,9 @@
-package com.salexandru.xcore.metaAnnotation;
+package com.salexandru.xcore.utils.metaAnnotation;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 @Target(ElementType.TYPE)
-public @interface ActionPerformer {
+public @interface PropertyComputer {
 
 }

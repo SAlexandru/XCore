@@ -10,7 +10,7 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class XCorexPropertyPage extends FieldEditorPreferencePage implements IWorkbenchPropertyPage {
 	

@@ -5,14 +5,14 @@ import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
 
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class XMetaModelEntityGenerator {
 	
 	private TypeMirror propertie_;
 	
 	private List<XPropertyComputerGenerator> computers_;
-	private List<XGroupBuilderGenerator> groupBuilders_;
+	private List<XRelationBuilder> groupBuilders_;
 	private List<XActionPreformerGenerator> actionPerformers_;
 	
 	private String underlyingType_;
@@ -57,7 +57,7 @@ public class XMetaModelEntityGenerator {
 		return underlyingType_;
 	}
 	
-	public void addGroupBuilder (XGroupBuilderGenerator gb) {
+	public void addGroupBuilder (XRelationBuilder gb) {
 		groupBuilders_.add(gb);
 	}
 	
@@ -73,7 +73,7 @@ public class XMetaModelEntityGenerator {
 		return extendedMetaType;
 	}
 
-	public List<XGroupBuilderGenerator> getBuilders() {return groupBuilders_;}
+	public List<XRelationBuilder> getBuilders() {return groupBuilders_;}
 	
 	public String generateImpl() {
 		boolean isExtension = this.isExtension();
@@ -82,12 +82,13 @@ public class XMetaModelEntityGenerator {
 		s.append("package " + impl_package +";\n\n");
 		
 		s.append("import " + entity_package + ".*;\n");
-		s.append("import com.salexandru.xcore.interfaces.HList;\n");
-		s.append("import com.salexandru.xcore.interfaces.TListEmpty;\n");
+		s.append("import com.salexandru.xcore.utils.interfaces.HList;\n");
+		s.append("import com.salexandru.xcore.utils.interfaces.TListEmpty;\n");
+		s.append("import com.salexandru.xcore.utils.annotationMarkers.*;\n");
 		for (XPropertyComputerGenerator computer: computers_) {
 			s.append ("import " + computer.getComputer().getQualifiedName() + ";\n");
 		}
-		for (XGroupBuilderGenerator gb: groupBuilders_) {
+		for (XRelationBuilder gb: groupBuilders_) {
 			s.append ("import " + gb.getQualifiedName() + ";\n");
 		}
 		for (XActionPreformerGenerator act: actionPerformers_) {
@@ -109,7 +110,7 @@ public class XMetaModelEntityGenerator {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", computer.getName()));
 		}
 		
-		for (XGroupBuilderGenerator gb: groupBuilders_) {
+		for (XRelationBuilder gb: groupBuilders_) {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
 		}
 		
@@ -137,7 +138,7 @@ public class XMetaModelEntityGenerator {
 			s.append("@Override\n");
 			s.append(computer.generateImpl(computer.getName() + "_INSTANCE"));
 		}
-		for (XGroupBuilderGenerator gb: groupBuilders_) {
+		for (XRelationBuilder gb: groupBuilders_) {
 			s.append("@Override\n");
 			s.append(gb.generateImpl(gb.getName() + "_INSTANCE"));
 			s.append("\n");
@@ -171,12 +172,13 @@ public class XMetaModelEntityGenerator {
 	public String toString() {
 		StringBuilder s = new StringBuilder("");
 		s.append("package " + entity_package + ";\n");
+		s.append("import com.salexandru.xcore.utils.annotationMarkers.*;\n");
 		s.append("public interface " + getName() + " extends " + extendedMetaType + " {\n");
 		for (XPropertyComputerGenerator computer: computers_) {
 			s.append("\t" + computer.generateSignature());
 			s.append("\n");
 		}
-		for (XGroupBuilderGenerator gb: groupBuilders_) {
+		for (XRelationBuilder gb: groupBuilders_) {
 			s.append("\t" + gb.generateSignature());
 			s.append("\n");
 		}		

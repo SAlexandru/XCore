@@ -27,8 +27,10 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.part.ViewPart;
 
-import com.salexandru.xcore.interfaces.Group;
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.annotationMarkers.ThisIsAProperty;
+import com.salexandru.xcore.utils.annotationMarkers.ThisIsARelationBuilder;
+import com.salexandru.xcore.utils.interfaces.RelationBuilder;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 import ro.lrg.insider.view.ToolRegistration.XEntityEntry;
 
@@ -221,7 +223,7 @@ public class XCorexTableView extends ViewPart {
 					MenuItem menuItem = (MenuItem)e.widget;
 					String groupNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
 					@SuppressWarnings("unchecked")
-					Group<XEntity> resultedGroup = (Group<XEntity>)applyMethod(element, groupNameAndTool);
+					RelationBuilder<XEntity> resultedGroup = (RelationBuilder<XEntity>)applyMethod(element, groupNameAndTool);
 					List<List<XEntityEntry>> unifiedElements = new ArrayList<>();
 					boolean first = true;
 					List<String> resultProperties = new ArrayList<>();
@@ -276,7 +278,7 @@ public class XCorexTableView extends ViewPart {
 		
 		MenuItem groupMenuItem = new MenuItem(main, SWT.CASCADE);
 		groupMenuItem.setMenu(groupMenu);
-		groupMenuItem.setText("Group");
+		groupMenuItem.setText("RelationBuilder");
 
 		new MenuItem(main, SWT.SEPARATOR);
 
@@ -349,7 +351,7 @@ public class XCorexTableView extends ViewPart {
 		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
 			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
 			for (Method m: anInterface.getDeclaredMethods()) {
-				if (!"getUnderlyingObject".equals(m.getName()) && !Group.class.equals(m.getReturnType())) {
+				if (m.isAnnotationPresent(ThisIsAProperty.class) ) {
 					if(!names.containsKey(toolName)) {
 						names.put(toolName, new ArrayList<String>());
 					}
@@ -365,7 +367,7 @@ public class XCorexTableView extends ViewPart {
 		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
 			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
 			for (Method m: anInterface.getDeclaredMethods()) {
-				if (!"getUnderlyingObject".equals(m.getName()) && Group.class.equals(m.getReturnType())) {
+				if (m.isAnnotationPresent(ThisIsARelationBuilder.class) ) {
 					if(!names.containsKey(toolName)) {
 						names.put(toolName, new ArrayList<String>());
 					}

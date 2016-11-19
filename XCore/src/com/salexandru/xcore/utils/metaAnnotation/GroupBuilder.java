@@ -1,4 +1,4 @@
-package com.salexandru.xcore.metaAnnotation;
+package com.salexandru.xcore.utils.metaAnnotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
