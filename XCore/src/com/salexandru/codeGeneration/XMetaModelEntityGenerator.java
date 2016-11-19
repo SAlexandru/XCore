@@ -13,6 +13,7 @@ public class XMetaModelEntityGenerator {
 	
 	private List<XPropertyComputerGenerator> computers_;
 	private List<XGroupBuilderGenerator> groupBuilders_;
+	private List<XActionPreformerGenerator> actionPerformers_;
 	
 	private String underlyingType_;
 	private String extendedMetaType;
@@ -27,6 +28,7 @@ public class XMetaModelEntityGenerator {
 		propertie_ = propertie;
 		computers_ = new ArrayList<>();
 		groupBuilders_ = new ArrayList<>();
+		actionPerformers_ = new ArrayList<>();
 		this.entity_package = entity_package;
 		this.impl_package = impl_package;
 	}
@@ -80,12 +82,18 @@ public class XMetaModelEntityGenerator {
 		s.append("package " + impl_package +";\n\n");
 		
 		s.append("import " + entity_package + ".*;\n");
+		s.append("import com.salexandru.xcore.interfaces.HList;\n");
+		s.append("import com.salexandru.xcore.interfaces.TListEmpty;\n");
 		for (XPropertyComputerGenerator computer: computers_) {
 			s.append ("import " + computer.getComputer().getQualifiedName() + ";\n");
 		}
 		for (XGroupBuilderGenerator gb: groupBuilders_) {
 			s.append ("import " + gb.getQualifiedName() + ";\n");
 		}
+		for (XActionPreformerGenerator act: actionPerformers_) {
+			s.append ("import " + act.getQualifiedName() + ";\n");
+		}
+		
 		s.append("\n\n");
 		if(isExtension) {
 			String extendedImpl = extendedMetaType.substring(0,extendedMetaType.indexOf(".entity"));
@@ -103,8 +111,14 @@ public class XMetaModelEntityGenerator {
 		
 		for (XGroupBuilderGenerator gb: groupBuilders_) {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", gb.getName()));
-			
 		}
+		
+		for (XActionPreformerGenerator act: actionPerformers_) {
+			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", act.getName()));
+		}
+		
+		
+		
 		s.append("\n\n");
 		s.append("    public " + getName() + "Impl" + "(" + underlyingType_ + " underlyingObj) {\n");
 		if(isExtension) {
@@ -128,6 +142,13 @@ public class XMetaModelEntityGenerator {
 			s.append(gb.generateImpl(gb.getName() + "_INSTANCE"));
 			s.append("\n");
 		}
+		for (XActionPreformerGenerator act: actionPerformers_) {
+			s.append("@Override\n");
+			s.append(act.generateImpl(act.getName() + "_INSTANCE"));
+			s.append("\n");
+		}
+		
+		
 		/*
 		 * hopefully this works 
 		 */
@@ -158,6 +179,10 @@ public class XMetaModelEntityGenerator {
 		for (XGroupBuilderGenerator gb: groupBuilders_) {
 			s.append("\t" + gb.generateSignature());
 			s.append("\n");
+		}		
+		for (XActionPreformerGenerator act: actionPerformers_) {
+			s.append("\t" + act.generateSignature());
+			s.append("\n");
 		}
 		s.append("\t" + underlyingType_ + " getUnderlyingObject();\n");
 		s.append("}\n");
@@ -168,6 +193,10 @@ public class XMetaModelEntityGenerator {
 
 	public boolean isExtension() {
 		return !extendedMetaType.equals(XEntity.class.getCanonicalName());
+	}
+
+	public void addActionPerformer(XActionPreformerGenerator gen) {
+		actionPerformers_.add(gen);
 	}
 
 }
