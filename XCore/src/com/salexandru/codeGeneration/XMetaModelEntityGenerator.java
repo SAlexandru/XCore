@@ -83,7 +83,7 @@ public class XMetaModelEntityGenerator {
 		
 		s.append("import " + entity_package + ".*;\n");
 		s.append("import com.salexandru.xcore.utils.interfaces.HList;\n");
-		s.append("import com.salexandru.xcore.utils.interfaces.TListEmpty;\n");
+		s.append("import com.salexandru.xcore.utils.interfaces.HListEmpty;\n");
 		s.append("import com.salexandru.xcore.utils.annotationMarkers.*;\n");
 		for (XPropertyComputerGenerator computer: computers_) {
 			s.append ("import " + computer.getComputer().getQualifiedName() + ";\n");

@@ -6,7 +6,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
 import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
-import com.salexandru.xcore.utils.interfaces.RelationBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
 
 public class XRelationBuilder {
 	
@@ -71,7 +71,7 @@ public class XRelationBuilder {
 			}
 		}
 		
-		return doc + "@ThisIsARelationBuilder " + String.format(RelationBuilder.class.getCanonicalName()+"<%s> %s();\n", elementType_.asElement().getSimpleName(), 
+		return doc + "@ThisIsARelationBuilder " + String.format(Group.class.getCanonicalName()+"<%s> %s();\n", elementType_.asElement().getSimpleName(), 
 					  							       getCamelCaseName());
 	}
 	
@@ -84,7 +84,7 @@ public class XRelationBuilder {
 				doc.append("\n*/\n");
 			}
 		}
-		return doc + String.format("@ThisIsARelationBuilder public " + RelationBuilder.class.getCanonicalName() + "<%s> %s() {\n  return %s.buildGroup(this);\n}", 
+		return doc + String.format("@ThisIsARelationBuilder public " + Group.class.getCanonicalName() + "<%s> %s() {\n  return %s.buildGroup(this);\n}", 
 							  elementType_.asElement().getSimpleName(), 
 							   getCamelCaseName(),
 							   instanceName

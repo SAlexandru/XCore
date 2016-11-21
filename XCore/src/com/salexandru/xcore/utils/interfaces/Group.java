@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class RelationBuilder <T extends XEntity> {
+public class Group <T extends XEntity> {
 	private List<T> elements_;
 	
-	public RelationBuilder() {
+	public Group() {
 		elements_ = new ArrayList<>();
 	}
 	

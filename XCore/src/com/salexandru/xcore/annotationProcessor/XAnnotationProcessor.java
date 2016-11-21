@@ -31,7 +31,7 @@ import com.salexandru.codeGeneration.XActionPreformerGenerator;
 import com.salexandru.codeGeneration.XCodeGenerator;
 import com.salexandru.xcore.preferencepage.XCorexPropertyPage.XCorePropertyStore;
 import com.salexandru.xcore.utils.metaAnnotation.ActionPerformer;
-import com.salexandru.xcore.utils.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.RelationBuilder;
 import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -44,7 +44,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 		super();
 		supportedAnnotations_ = new HashSet<>();
 		supportedAnnotations_.add(PropertyComputer.class.getCanonicalName());
-		supportedAnnotations_.add(GroupBuilder.class.getCanonicalName());
+		supportedAnnotations_.add(RelationBuilder.class.getCanonicalName());
 		supportedAnnotations_.add(ActionPerformer.class.getCanonicalName());
 	}
 	
@@ -78,7 +78,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 
 		IJavaProject jProject = getJavaProject();
 
-		generator_ = new XCodeGenerator(jProject.getElementName().toLowerCase() + ".metamodel");
+		generator_ = new XCodeGenerator("com.xcore.javaProject.metamodel");
 		
 		if (roundEnv.processingOver()) {
 			return true;
@@ -185,7 +185,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 	}
 	
 	private void processGroupBuilder(RoundEnvironment env) {
-		for (Element elem: env.getElementsAnnotatedWith(GroupBuilder.class)) {
+		for (Element elem: env.getElementsAnnotatedWith(RelationBuilder.class)) {
 			if (ElementKind.CLASS != elem.getKind()) {
 				printError (elem, "@GroupBuilder must annotate classes!");
 			}

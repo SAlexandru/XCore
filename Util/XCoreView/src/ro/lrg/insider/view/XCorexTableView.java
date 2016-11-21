@@ -29,7 +29,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.salexandru.xcore.utils.annotationMarkers.ThisIsAProperty;
 import com.salexandru.xcore.utils.annotationMarkers.ThisIsARelationBuilder;
-import com.salexandru.xcore.utils.interfaces.RelationBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
 import com.salexandru.xcore.utils.interfaces.XEntity;
 
 import ro.lrg.insider.view.ToolRegistration.XEntityEntry;
@@ -223,7 +223,7 @@ public class XCorexTableView extends ViewPart {
 					MenuItem menuItem = (MenuItem)e.widget;
 					String groupNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
 					@SuppressWarnings("unchecked")
-					RelationBuilder<XEntity> resultedGroup = (RelationBuilder<XEntity>)applyMethod(element, groupNameAndTool);
+					Group<XEntity> resultedGroup = (Group<XEntity>)applyMethod(element, groupNameAndTool);
 					List<List<XEntityEntry>> unifiedElements = new ArrayList<>();
 					boolean first = true;
 					List<String> resultProperties = new ArrayList<>();

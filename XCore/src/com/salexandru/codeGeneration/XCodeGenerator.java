@@ -22,7 +22,7 @@ public class XCodeGenerator {
 	
 	public XCodeGenerator(String theBasePackage) {
 		entities_ = new HashMap<>();
-		this.theBasePackage = theBasePackage;
+		this.theBasePackage =  theBasePackage;
 		entity_package = theBasePackage + ".entity";
 		impl_package = theBasePackage + ".impl";
 		factory_package = theBasePackage + ".factory";

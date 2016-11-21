@@ -12,7 +12,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
 import com.salexandru.xcore.utils.interfaces.IActionPerformer;
-import com.salexandru.xcore.utils.interfaces.TListEmpty;
+import com.salexandru.xcore.utils.interfaces.HListEmpty;
 
 
 public class XActionPreformerGenerator {
@@ -62,7 +62,7 @@ public class XActionPreformerGenerator {
 				
 				typeNames.add(type);
 				
-				if (!types.get(1).toString().equals(TListEmpty.class.getCanonicalName())) {
+				if (!types.get(1).toString().equals(HListEmpty.class.getCanonicalName())) {
 				  typeNames.addAll(types.get(1).accept(new ExtractHList(), null));
 				}
 			}
@@ -150,7 +150,7 @@ public class XActionPreformerGenerator {
 					getCamelCaseName(),
 					returnOrNot,
 					instanceName,
-					TListEmpty.class.getCanonicalName()
+					HListEmpty.class.getCanonicalName()
 				   );
 		}
 		else {
@@ -160,7 +160,7 @@ public class XActionPreformerGenerator {
 			}
 			
 			
-			builder.append("args" + (argumentTypes_.size() - 1) + "," + TListEmpty.class.getCanonicalName() + ".getInstance()");
+			builder.append("args" + (argumentTypes_.size() - 1) + "," + HListEmpty.class.getCanonicalName() + ".getInstance()");
 			
 			for (int i = 0; i < argumentTypes_.size(); ++i) {
 				builder.append(")");
