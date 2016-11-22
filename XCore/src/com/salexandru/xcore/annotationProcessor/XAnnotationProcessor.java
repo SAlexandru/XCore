@@ -78,7 +78,7 @@ public class XAnnotationProcessor extends AbstractProcessor {
 
 		IJavaProject jProject = getJavaProject();
 
-		generator_ = new XCodeGenerator("com.xcore.javaProject.metamodel");
+		generator_ = new XCodeGenerator(jProject.getElementName().toLowerCase() + ".metamodel");
 		
 		if (roundEnv.processingOver()) {
 			return true;
