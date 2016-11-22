@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: XCore
 Bundle-SymbolicName: XCore;singleton:=true
-Bundle-Version: 1.1.2
+Bundle-Version: 1.2.0
 Bundle-Activator: com.salexandru.xcore.plugin.Activator
 Bundle-Vendor: com.salexandru
 Require-Bundle: org.eclipse.ui,
