@@ -5,16 +5,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.salexandru.xcore.interfaces.Group;
-import com.salexandru.xcore.interfaces.IGroupBuilder;
-import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
+import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.RelationBuilder;
 
 import exampletool.metamodel.entity.XPackage;
 import exampletool.metamodel.entity.XProject;
 import exampletool.metamodel.factory.Factory;
 
-@GroupBuilder
-public class ListProjectPackages implements IGroupBuilder<XPackage, XProject> {
+@RelationBuilder
+public class ListProjectPackages implements IRelationBuilder<XPackage, XProject> {
 	private void getPackages(final IPackageFragmentRoot rootFragment, final Group<XPackage> group_) {
 		try {
 			if (null == rootFragment || IPackageFragmentRoot.K_SOURCE != rootFragment.getKind()) {

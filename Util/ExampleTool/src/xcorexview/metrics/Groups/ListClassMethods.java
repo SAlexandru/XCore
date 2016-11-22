@@ -3,9 +3,9 @@ package xcorexview.metrics.Groups;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.salexandru.xcore.interfaces.Group;
-import com.salexandru.xcore.interfaces.IGroupBuilder;
-import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
+import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.RelationBuilder;
 
 import exampletool.metamodel.entity.XClass;
 import exampletool.metamodel.entity.XMethod;
@@ -17,8 +17,8 @@ import exampletool.metamodel.factory.Factory;
  *
  * @param entity  the XClass used for processing
  */
-@GroupBuilder
-public class ListClassMethods implements IGroupBuilder<XMethod, XClass> {
+@RelationBuilder
+public class ListClassMethods implements IRelationBuilder<XMethod, XClass> {
 	@Override
 	public Group<XMethod> buildGroup(XClass entity) {
 		Group<XMethod> group_ = new Group<>();

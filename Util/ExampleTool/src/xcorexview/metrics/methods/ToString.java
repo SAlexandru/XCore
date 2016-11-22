@@ -1,7 +1,7 @@
 package xcorexview.metrics.methods;
 
-import com.salexandru.xcore.interfaces.IPropertyComputer;
-import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.utils.interfaces.IPropertyComputer;
+import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 
 import exampletool.metamodel.entity.XMethod;
 

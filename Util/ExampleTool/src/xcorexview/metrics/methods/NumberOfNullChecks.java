@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import com.salexandru.xcore.interfaces.IPropertyComputer;
-import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.utils.interfaces.IPropertyComputer;
+import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 
 import exampletool.metamodel.entity.XMethod;
 

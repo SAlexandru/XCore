@@ -14,8 +14,8 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import com.salexandru.xcore.interfaces.IPropertyComputer;
-import com.salexandru.xcore.metaAnnotation.PropertyComputer;
+import com.salexandru.xcore.utils.interfaces.IPropertyComputer;
+import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 
 import exampletool.metamodel.entity.XClass;
 

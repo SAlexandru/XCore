@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ui.PartInitException;
 
-import com.salexandru.xcore.interfaces.XEntity;
+import com.salexandru.xcore.utils.interfaces.XEntity;
 
 import exampletool.metamodel.factory.Factory;
 import ro.lrg.insider.view.ToolRegistration;

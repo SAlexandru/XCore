@@ -5,16 +5,16 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.salexandru.xcore.interfaces.Group;
-import com.salexandru.xcore.interfaces.IGroupBuilder;
-import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
+import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.RelationBuilder;
 
 import exampletool.metamodel.entity.XClass;
 import exampletool.metamodel.entity.XPackage;
 import exampletool.metamodel.factory.Factory;
 
-@GroupBuilder
-public class ListPackageClasses implements IGroupBuilder<XClass, XPackage> {
+@RelationBuilder
+public class ListPackageClasses implements IRelationBuilder<XClass, XPackage> {
 	@Override
 	public Group<XClass> buildGroup(XPackage entity) {
 		Group<XClass> group_ = new Group<>();

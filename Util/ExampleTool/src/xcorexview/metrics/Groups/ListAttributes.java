@@ -4,16 +4,16 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.salexandru.xcore.interfaces.Group;
-import com.salexandru.xcore.interfaces.IGroupBuilder;
-import com.salexandru.xcore.metaAnnotation.GroupBuilder;
+import com.salexandru.xcore.utils.interfaces.Group;
+import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
+import com.salexandru.xcore.utils.metaAnnotation.RelationBuilder;
 
 import exampletool.metamodel.entity.XClass;
 import exampletool.metamodel.entity.XField;
 import exampletool.metamodel.factory.Factory;
 
-@GroupBuilder
-public class ListAttributes implements IGroupBuilder<XField, XClass> {
+@RelationBuilder
+public class ListAttributes implements IRelationBuilder<XField, XClass> {
 	@Override
 	public Group<XField> buildGroup(XClass entity) {
 		Group<XField> group_ = new Group<>();
