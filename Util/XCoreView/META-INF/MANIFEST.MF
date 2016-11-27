@@ -21,3 +21,4 @@ Export-Package: com.salexandru.xcore.utils.annotationMarkers,
    org.eclipse.swt.widgets,
    org.eclipse.jface.viewers,
    org.eclipse.ui.part"
+Import-Package: com.salexandru.xcore.utils.annotationMarkers

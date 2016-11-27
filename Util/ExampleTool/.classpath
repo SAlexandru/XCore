@@ -7,7 +7,7 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Insider/lib/XCoreInterfaces_1.1.0.jar"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="/Users/nightcrawler/Documents/Projects/XCore/XCore/deploy/lib/XCoreInterfaces_1.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

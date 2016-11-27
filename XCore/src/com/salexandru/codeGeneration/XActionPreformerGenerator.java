@@ -124,7 +124,14 @@ public class XActionPreformerGenerator {
 		   }
 		}
 		
-		return doc + String.format("@ThisIsAnAction public %s %s (%s);\n", returnTypeAsString(), getCamelCaseName(), builder);
+		return 
+		  doc + String.format(
+				"@ThisIsAnAction(numParams = %d) public %s %s (%s);\n", 
+				argumentTypes_.size(),
+				returnTypeAsString(), 
+				getCamelCaseName(), 
+				builder
+		);
 	}
 	
 	public String generateImpl(String instanceName) {
@@ -177,7 +184,8 @@ public class XActionPreformerGenerator {
 		}
 		
 		return doc + String.format(
-				"\t@ThisIsAnAction public %s %s(%s) {\n\t\t%s %s.performAction(this, %s);\n\t}", 
+				"\t@ThisIsAnAction(numParams = %d) public %s %s(%s) {\n\t\t%s %s.performAction(this, %s);\n\t}", 
+				argumentTypes_.size(),
 				returnTypeAsString(), 
 				getCamelCaseName(),
 				arguments,

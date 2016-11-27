@@ -1,5 +1,6 @@
 package ro.lrg.insider.view;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -29,6 +31,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.salexandru.xcore.utils.annotationMarkers.ThisIsAProperty;
 import com.salexandru.xcore.utils.annotationMarkers.ThisIsARelationBuilder;
+import com.salexandru.xcore.utils.annotationMarkers.ThisIsAnAction;
 import com.salexandru.xcore.utils.interfaces.Group;
 import com.salexandru.xcore.utils.interfaces.XEntity;
 
@@ -183,11 +186,30 @@ public class XCorexTableView extends ViewPart {
 		Menu main = new Menu(parent_);
 		Menu propertyMenu = new Menu(main);
 		Menu groupMenu = new Menu(main);
-		Menu showWithMenu = new Menu(main);
+		Menu actionMenu = new Menu(main);
+		
 
 		prop2Pos.clear();
-		Map<String, List<String>> allProperties = getAllProperties(unifiedEntity,prop2Pos);
-		Map<String, List<String>> allGroups = getAllGroups(unifiedEntity,prop2Pos);
+		Map<String, List<String>> allProperties = getAllEntities(
+			unifiedEntity,
+			prop2Pos,
+			propertyCheckerForAnnotation(ThisIsAProperty.class)
+		);
+		
+		Map<String, List<String>> allGroups = getAllEntities(
+			unifiedEntity,
+			prop2Pos,
+			propertyCheckerForAnnotation(ThisIsARelationBuilder.class)
+		);
+		
+		Map<String, List<String>> allActions = getAllEntities(
+			unifiedEntity,
+			prop2Pos,
+			(m) -> {
+				ThisIsAnAction ann = m.getAnnotation(ThisIsAnAction.class);
+				return null != ann && ann.numParams() == 0;
+			}
+		);
 		
 		for(String aToolName : allProperties.keySet()) {
 			Menu aToolProperties = new Menu(propertyMenu);
@@ -252,22 +274,22 @@ public class XCorexTableView extends ViewPart {
 			}
 		}
 		
-		for(String aToolName : getAllTools(unifiedEntity)) {
-			MenuItem toolShowItem = new MenuItem(showWithMenu,SWT.NONE);		
-			toolShowItem.setText(aToolName);
-			toolShowItem.addListener(SWT.Selection, (Event e) -> {
-				int selection = viewer_.getTable().getSelectionIndex();
-				if (dataHistory_.peek().isEmpty() || dataHistory_.peek().size() <= selection) {
-					return;
-				}
-				List<XEntityEntry> selectedUnifiedEntity = dataHistory_.peek().get(selection);
-				for(XEntityEntry anEntry : selectedUnifiedEntity) {
-					if(getEntityTools(anEntry.theEntity).contains(aToolName)) {
-						anEntry.theConverter.show(anEntry.theEntity);
-						break;
-					}
-				}
-			});
+		for (Entry<String, List<String>> entry: allActions.entrySet()) {
+			Menu aToolAction = new Menu(actionMenu);
+			MenuItem toolActionItem = new MenuItem(actionMenu, SWT.CASCADE);
+			toolActionItem.setMenu(aToolAction);
+			toolActionItem.setText(entry.getKey());
+			
+			for (String aAction: entry.getValue()) {
+				MenuItem aActionItem = new MenuItem(aToolAction, SWT.NONE);
+				aActionItem.setText(aAction);
+				aActionItem.addListener(SWT.Selection, e-> {
+					MenuItem menuItem = (MenuItem)e.widget;
+					List<XEntityEntry> element = dataHistory_.peek().get(viewer_.getTable().getSelectionIndex());
+					String actionNameAndTool = menuItem.getText() + " [" + menuItem.getParent().getParentItem().getText() + "]";
+					applyMethod(element, actionNameAndTool);
+				});
+			}
 		}
 
 		MenuItem propertyMenuItem = new MenuItem(main, SWT.CASCADE);
@@ -278,104 +300,80 @@ public class XCorexTableView extends ViewPart {
 		
 		MenuItem groupMenuItem = new MenuItem(main, SWT.CASCADE);
 		groupMenuItem.setMenu(groupMenu);
-		groupMenuItem.setText("RelationBuilder");
+		groupMenuItem.setText("Group");
 
 		new MenuItem(main, SWT.SEPARATOR);
-
-		MenuItem showWithItem = new MenuItem(main, SWT.CASCADE);
-		showWithItem.setMenu(showWithMenu);
-		showWithItem.setText("Show With");
+		
+		MenuItem actionMenuItem = new MenuItem(main, SWT.CASCADE);
+		actionMenuItem.setMenu(actionMenu);
+		actionMenuItem.setText("Actions");
+		
+		new MenuItem(main, SWT.SEPARATOR);
 
 		return main;
 	}
-
-	private Map<String,List<String>> getAllProperties(List<XEntityEntry> unifiedEntity, Map<String, Integer> crossReference) {
-		Map<String,List<String>> allProperties = new HashMap<String,List<String>>();
-		for(int i = 0; i < unifiedEntity.size(); i++) {
-			XEntityEntry anUnifiedEntityEntry = unifiedEntity.get(i);
-			Map<String, List<String>> properties = getEntityProperties(anUnifiedEntityEntry.theEntity);
-			for(String aTool : properties.keySet()) {
-				if(allProperties.containsKey(aTool)) {
-					allProperties.get(aTool).addAll(properties.get(aTool));
-				} else {
-					allProperties.put(aTool,properties.get(aTool));
+	
+	private <A> Map<String, List<String>> getAllEntities(
+			List<XEntityEntry> unifiedEntity, 
+			Map<String, Integer> crossReference,
+			HasProperty propertyChecker
+	) {
+		Map<String,List<String>> allAnnotatedElements = new HashMap<>();
+		
+		int i = 0;
+		for(XEntityEntry anUnifiedEntityEntry: unifiedEntity) {
+			Map<String, List<String>> annotatedEntity = getAllEntitiesAnnotatedWith(
+					anUnifiedEntityEntry.theEntity,
+					propertyChecker
+			);
+			final int index = i;
+			annotatedEntity.forEach((key, value) -> {
+				if (!allAnnotatedElements.containsKey(key)) {
+					allAnnotatedElements.put(key, new ArrayList<>());	
 				}
+				allAnnotatedElements.get(key).addAll(value);
 				if(crossReference != null) {
-					for(String aProp : allProperties.get(aTool))
-						crossReference.put(aTool + "/" + aProp, i);
-					if(!allProperties.get(aTool).contains("ToString")) {
-						crossReference.put(aTool + "/" + "ToString", i);
+					for(String aProp : allAnnotatedElements.get(key))
+						crossReference.put(key + "/" + aProp, index);
+					if(!allAnnotatedElements.get(key).contains("ToString")) {
+						crossReference.put(key + "/" + "ToString", index);
 					}
 				}
-			}
+			});
+			i+=1;
 		}
-		return allProperties;
+		return allAnnotatedElements;	
 	}
-
-	private Map<String,List<String>> getAllGroups(List<XEntityEntry> unifiedEntity, Map<String, Integer> crossReference) {
-		Map<String,List<String>> allGroups = new HashMap<String,List<String>>();
-		for(int i = 0; i < unifiedEntity.size(); i++) {
-			XEntityEntry anUnifiedEntityEntry = unifiedEntity.get(i);
-			Map<String, List<String>> groups = getEntityGroups(anUnifiedEntityEntry.theEntity);
-			for(String aToolName : groups.keySet()) {
-				if(allGroups.containsKey(aToolName)) {
-					allGroups.get(aToolName).addAll(groups.get(aToolName));
-				} else {
-					allGroups.put(aToolName,groups.get(aToolName));
-				}
-				if(crossReference != null) {
-					for(String aGroup : allGroups.get(aToolName))
-						crossReference.put(aToolName + "/" + aGroup, i);
+	
+	private <A> Map<String, List<String>> getAllEntitiesAnnotatedWith(XEntity anEntity, HasProperty propertyChecker) {
+		Map<String,List<String>> names = new HashMap<>();
+		
+		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
+			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
+			for (Method m: anInterface.getDeclaredMethods()) {
+				if (propertyChecker.isValid(m)) {
+					if(!names.containsKey(toolName)) {
+						names.put(toolName, new ArrayList<String>());
+					}
+					names.get(toolName).add(capitalize(m.getName()));
 				}
 			}
 		}
-		return allGroups;
+		return names;	
 	}
 
 	private Set<String> getAllTools(List<XEntityEntry> unifiedEntity) {
 		HashSet<String> res = new HashSet<>();		
-		res.addAll(getAllProperties(unifiedEntity,null).keySet());
-		res.addAll(getAllGroups(unifiedEntity,null).keySet());
+		res.addAll(getAllEntities(unifiedEntity,null, propertyCheckerForAnnotation(ThisIsAProperty.class)).keySet());
+		res.addAll(getAllEntities(unifiedEntity,null, propertyCheckerForAnnotation(ThisIsARelationBuilder.class)).keySet());
 		return res;
 	}
 
 	private Set<String> getEntityTools(XEntity anEntity) {
 		HashSet<String> res = new HashSet<>();		
-		res.addAll(getEntityProperties(anEntity).keySet());
-		res.addAll(getEntityGroups(anEntity).keySet());
+		res.addAll(getAllEntitiesAnnotatedWith(anEntity, propertyCheckerForAnnotation(ThisIsAProperty.class)).keySet());
+		res.addAll(getAllEntitiesAnnotatedWith(anEntity, propertyCheckerForAnnotation(ThisIsARelationBuilder.class)).keySet());
 		return res;
-	}
-	
-	private Map<String,List<String>> getEntityProperties(XEntity anEntity) {
-		Map<String,List<String>> names = new HashMap<String,List<String>>();
-		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
-			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
-			for (Method m: anInterface.getDeclaredMethods()) {
-				if (m.isAnnotationPresent(ThisIsAProperty.class) ) {
-					if(!names.containsKey(toolName)) {
-						names.put(toolName, new ArrayList<String>());
-					}
-					names.get(toolName).add(capitalize(m.getName()));
-				}
-			}
-		}
-		return names;
-	}
-	
-	private Map<String,List<String>> getEntityGroups(XEntity anEntity) {
-		Map<String,List<String>> names = new HashMap<String,List<String>>();
-		for(Class<?> anInterface : getAllInterfaces(anEntity.getClass())) {
-			String toolName = anInterface.getCanonicalName().substring(0, anInterface.getCanonicalName().indexOf('.'));
-			for (Method m: anInterface.getDeclaredMethods()) {
-				if (m.isAnnotationPresent(ThisIsARelationBuilder.class) ) {
-					if(!names.containsKey(toolName)) {
-						names.put(toolName, new ArrayList<String>());
-					}
-					names.get(toolName).add(capitalize(m.getName()));
-				}
-			}
-		}
-		return names;
 	}
 	
 	private Set<Class<?>> getAllInterfaces(Class<?> aClass) {
@@ -420,5 +418,8 @@ public class XCorexTableView extends ViewPart {
 		}
 		
 	}
-		
+	
+	private HasProperty propertyCheckerForAnnotation(Class<? extends Annotation> ann) {
+		return (m) -> m.isAnnotationPresent(ann);
+	}
 }

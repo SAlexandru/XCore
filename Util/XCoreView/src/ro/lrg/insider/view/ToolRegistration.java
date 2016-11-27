@@ -18,8 +18,6 @@ public class ToolRegistration {
 	public interface XEntityConverter {
 		
 		public XEntity convert(Object element);
-			
-		public void show(XEntity theEntity);
 		
 	}
 	

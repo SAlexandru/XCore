@@ -1,17 +1,11 @@
 package demo;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.ui.PartInitException;
 
 import com.salexandru.xcore.utils.interfaces.XEntity;
 
@@ -41,21 +35,6 @@ public class StartUp implements org.eclipse.ui.IStartup{
 						}
 						return null;
 					}
-					
-					@Override
-					public void show(XEntity theEntity) {
-						try {
-							Method met = theEntity.getClass().getMethod("getUnderlyingObject");
-							Object result = met.invoke(theEntity);
-							if (result instanceof IJavaElement) {
-								JavaUI.openInEditor((IJavaElement)result, true, true);
-							}
-						}
-						catch (PartInitException | JavaModelException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
-							e1.printStackTrace();
-						}
-					}
-					
 				}
 		);		
 	}
