@@ -300,7 +300,7 @@ public class XCorexTableView extends ViewPart {
 		
 		MenuItem groupMenuItem = new MenuItem(main, SWT.CASCADE);
 		groupMenuItem.setMenu(groupMenu);
-		groupMenuItem.setText("Group");
+		groupMenuItem.setText("Groups");
 
 		new MenuItem(main, SWT.SEPARATOR);
 		
