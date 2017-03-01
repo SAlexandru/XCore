@@ -331,7 +331,11 @@ public class XCorexTableView extends ViewPart {
 				if (!allAnnotatedElements.containsKey(key)) {
 					allAnnotatedElements.put(key, new ArrayList<>());	
 				}
-				allAnnotatedElements.get(key).addAll(value);
+				for(String aValue : value) {
+					if (!allAnnotatedElements.get(key).contains(aValue)) {
+						allAnnotatedElements.get(key).add(aValue);
+					}
+				}
 				if(crossReference != null) {
 					for(String aProp : allAnnotatedElements.get(key))
 						crossReference.put(key + "/" + aProp, index);
