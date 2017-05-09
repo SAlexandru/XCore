@@ -2,6 +2,7 @@ package com.salexandru.xcore.annotationProcessor;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -96,8 +97,10 @@ public class XAnnotationProcessor extends AbstractProcessor {
 				}
 				p.setExtendedMetaType(prop.getExtendedMetaType(p.getName()));
 				p.setUnderlyingMetaType(prop.getUnderlyingMetaType(p.getName()));
+				p.addExtraMetaType(prop.getExtendedTypes(p.getName()));
 			}
-			prop.doSave();
+			
+			prop.save(Collections.emptyMap());
 		}
 		
 		try {

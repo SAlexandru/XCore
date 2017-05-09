@@ -41,7 +41,7 @@ public class MetaTypePropertyDialog extends Dialog {
 	  if (null == xcoreMetaType || null == underlyingMetaType || xcoreMetaType.isEmpty() || underlyingMetaType.isEmpty()) {
 		  return null;
 	  }
-	  return new String[] {xcoreMetaType, underlyingMetaType};
+	  return new String[] {xcoreMetaType.trim(), underlyingMetaType.trim()};
 	}
   
  	public void setXCoreMetaType(String text) {

@@ -1,6 +1,12 @@
 package com.salexandru.xcore.preferencepage;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -38,8 +44,10 @@ public class XCorexFieldEditor extends FieldEditor {
 
 	private IJavaProject thePrj;
 	private Table table;
+	private Table extraTable;
 	private Combo extendedMetaModelField;
 	private HashSet<String> toRemoveName = new HashSet<String>();
+	private HashMap<String, Set<String>> removeExtra = new HashMap<>();
 
 	public XCorexFieldEditor(IJavaProject theProject, Composite parent) {
 		thePrj = theProject;
@@ -53,13 +61,20 @@ public class XCorexFieldEditor extends FieldEditor {
 
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
+  		parent.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING | GridData.BEGINNING));
+  		parent.setLayout(new GridLayout(2, false));
+		
 		
 		GridData tmp;
 				
 		Label extendedMMGroup = new Label(parent, SWT.NONE);
 		extendedMMGroup.setText("Extended meta-model");
-		tmp = new GridData();
+		
+		tmp = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING | GridData.BEGINNING);
 		tmp.horizontalSpan = 2;
+		//tmp.horizontalAlignment = SWT.LEFT;
+		//tmp.verticalAlignment = SWT.BEGINNING;
+		
 		extendedMMGroup.setLayoutData(tmp);
 		Label extendedMetaModelLocationLable = new Label(parent, SWT.NONE);
 		extendedMetaModelLocationLable.setText("Package location:");
@@ -98,8 +113,12 @@ public class XCorexFieldEditor extends FieldEditor {
 		
 		Label underlyingMMGroup = new Label(parent, SWT.NONE);
 		underlyingMMGroup.setText("Underlying meta-model");
-		tmp = new GridData();
+		
+		tmp = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING | GridData.BEGINNING);
 		tmp.horizontalSpan = 2;
+		//tmp.horizontalAlignment = SWT.LEFT;
+		//tmp.verticalAlignment = SWT.BEGINNING;
+		
 		underlyingMMGroup.setLayoutData(tmp);
 		Composite panel = new Composite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
@@ -109,8 +128,9 @@ public class XCorexFieldEditor extends FieldEditor {
 		Button underlyingMetaModelRemove = new Button(panel, SWT.PUSH);
 		underlyingMetaModelRemove.setText("Remove");
 		underlyingMetaModelRemove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		table= new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		table= new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.LEFT_TO_RIGHT | SWT.LEFT);
+		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING ));
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		TableColumn t1 = new TableColumn(table, SWT.LEAD);
@@ -160,14 +180,17 @@ public class XCorexFieldEditor extends FieldEditor {
 				if(((Combo)e.widget).getText() != null && !((Combo)e.widget).getText().isEmpty()) {
 					String pack = ((Combo)e.widget).getText();
 					XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
-					String[][] underlayingMappings = pp.toMatrix();
-					for(String[] aMetaTypeEntry : underlayingMappings){
+				
+					for(Entry<String, Entry<String, String>> entry: pp.loadOriginal().entrySet()){
+						String meta = entry.getKey();
+						
 						try {
-							IType t = thePrj.findType(pack + "." + aMetaTypeEntry[0]);
+							IType t = thePrj.findType(pack + "." + meta);
 							if(t != null) {
 								for(IMethod am : t.getMethods()) {
 									if(am.getElementName().equals("getUnderlyingObject")) {
-										pp.setBindings(aMetaTypeEntry[0], Signature.toString(Signature.getReturnType(am.getSignature())), t.getFullyQualifiedName());
+										pp.setExternalMetaType(meta, t.getFullyQualifiedName());
+										pp.setUnderlyingMetaType(meta,Signature.toString(Signature.getReturnType(am.getSignature())));
 									}
 								}
 							}
@@ -184,16 +207,6 @@ public class XCorexFieldEditor extends FieldEditor {
 			}
 		});
 		
-		parent.addControlListener(new ControlListener() {		
-			@Override
-			public void controlResized(ControlEvent e) {
-				parent.pack();
-			}
-			
-			@Override
-			public void controlMoved(ControlEvent e) {}
-		});
-		
 		underlyingMetaModelRemove.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -208,22 +221,154 @@ public class XCorexFieldEditor extends FieldEditor {
 				widgetSelected(e);
 			}
 		});
+		
+		
+		Label extraUnderlyingMMGroup = new Label(parent, SWT.NONE);
+		extraUnderlyingMMGroup.setText("Extra Underlying meta-models");
+		
+		tmp = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING | GridData.BEGINNING);
+		tmp.horizontalSpan = 2;
+		//tmp.horizontalAlignment = SWT.LEFT;
+		//tmp.verticalAlignment = SWT.BEGINNING;
+		
+		extraUnderlyingMMGroup.setLayoutData(tmp);
+		
+		panel = new Composite(parent, SWT.NONE);
+		panel.setLayout(new GridLayout());
+		
+		Button extraUnderlyingMetaModelAdd = new Button(panel, SWT.PUSH);
+		extraUnderlyingMetaModelAdd.setText("Add New Meta-Model Type");
+		extraUnderlyingMetaModelAdd.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button extraUnderlyingMetaModelEdit = new Button(panel, SWT.PUSH);
+		extraUnderlyingMetaModelEdit.setText("Edit");
+		extraUnderlyingMetaModelEdit.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button extraUnderlyingMetaModelRemove = new Button(panel, SWT.PUSH);
+		extraUnderlyingMetaModelRemove.setText("Remove");
+		extraUnderlyingMetaModelRemove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		extraTable = new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.LEFT_TO_RIGHT | SWT.LEFT);
+		extraTable.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING ));
+		extraTable.setHeaderVisible(true);
+		extraTable.setLinesVisible(true);
+		
+		TableColumn c1 = new TableColumn(extraTable, SWT.LEAD);
+		c1.setText("XCore meta-type");
+		c1.setResizable(true);
+		
+		TableColumn c2 = new TableColumn(extraTable, SWT.LEAD);
+		c2.setText("New Underlying meta-type");
+		c2.setResizable(true);
+		
+		TableColumn c3 = new TableColumn(extraTable, SWT.LEAD);
+		c3.setText("Transformer");
+		c3.setResizable(true);
+		
+		
+		TableLayout extra_table_layout = new TableLayout();
+		extraTable.setLayout(extra_table_layout);
+		extra_table_layout.addColumnData(new ColumnWeightData(0,100));
+		extra_table_layout.addColumnData(new ColumnWeightData(0,200));
+		extra_table_layout.addColumnData(new ColumnWeightData(0,200));
+		
+		extraUnderlyingMetaModelAdd.addSelectionListener(new SelectionListener() {			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem item = new TableItem(extraTable, 3);
+				XCorePropertyStore store = (XCorePropertyStore) getPreferenceStore();
+				
+				ExtraMetaTypePropertyDialog d = new ExtraMetaTypePropertyDialog(null, thePrj, store.loadUnderlying());
+				
+				d.open();
+				if(d.getReturnCode() == Window.OK) {
+					item.setText(d.getData());				
+				}
+			}	
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		
+		extraUnderlyingMetaModelEdit.addSelectionListener(new SelectionListener() {			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] var = extraTable.getSelection();
+				XCorePropertyStore store = (XCorePropertyStore) getPreferenceStore();
+					
+				ExtraMetaTypePropertyDialog d = new ExtraMetaTypePropertyDialog(null, thePrj, var[0].getText(0).trim(), store.getUnderlyingMetaType(var[0].getText(0).trim()));
+					
+				d.open();
+				if (d.getReturnCode() == Window.OK) {
+					var[0].setText(d.getData());				
+				}
+			}	
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		
+		extraUnderlyingMetaModelRemove.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] var = extraTable.getSelection();
+				if(var.length > 0) {
+					String key = var[0].getText(0);
+					if (!removeExtra.containsKey(key)) {
+						removeExtra.put(key, new HashSet<>());
+					}
+					
+					removeExtra.get(key).add(var[0].getText(1));
+					extraTable.remove(extraTable.getSelectionIndices());
+				}
+			}			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		
+		parent.addControlListener(new ControlListener() {		
+			@Override
+			public void controlResized(ControlEvent e) {
+				parent.pack();
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent e) {}
+		});
+		
+		
 		parent.pack();
 	}
 
 	@Override
 	protected void doLoad() {
 		toRemoveName.clear();
+		removeExtra.clear();
 		table.removeAll();
-		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
-		String[][] mappings = pp.toMatrix();
-		for(int i = 0; i < mappings.length; i++) {
-			TableItem ti = new TableItem(table, SWT.NONE);
-			ti.setText(mappings[i]);
-			if(!mappings[i][2].equals(XEntity.class.getCanonicalName())) {
-				String txt = mappings[i][2];
-				txt = txt.substring(0, txt.lastIndexOf('.'));
-				extendedMetaModelField.setText(txt);
+		extraTable.removeAll();
+		
+		for (ExtraBinding binding: ((XCorePropertyStore) getPreferenceStore()).loadAll() ) {
+			List<IBinding> items = binding.getBindings();
+			
+			final String key = binding.getEntity();
+			final String underlying = items.get(0).getType();
+			final String extraModel = items.get(1).getType();
+			
+			
+			TableItem tableBinding = new TableItem(table, SWT.NONE);
+			tableBinding.setText(new String[] {key, underlying, extraModel});
+			
+			items = items.subList(2, items.size());
+			
+			if (!items.isEmpty()) {
+				for (IBinding type: items) {
+					TableItem extraBinding = new TableItem(extraTable, SWT.NONE);
+					extraBinding.setText(new String[] {key, type.getType(), ((ExtraTypeBinding)type).getTransformer()});
+				}
 			}
 		}
 	}
@@ -231,27 +376,39 @@ public class XCorexFieldEditor extends FieldEditor {
 	@Override
 	protected void doLoadDefault() {
 		toRemoveName.clear();
+		removeExtra.clear();
 		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
 		for(int i = 0; i < table.getItemCount(); i++) {
 			pp.setToDefault(table.getItem(i).getText(0));
 		}		
+		
 		doLoad();
 		extendedMetaModelField.deselectAll();
 	}
 
 	@Override
 	protected void doStore() {
+		Map<String, List<IBinding>> stored = new HashMap<>();
 		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
-		for(int i = 0; i < table.getItemCount(); i++) {
-			pp.setBindings(table.getItem(i).getText(0), table.getItem(i).getText(1), pp.getExtendedMetaType(table.getItem(i).getText(0)));
+		
+		for (int i = 0; i < table.getItemCount(); ++i) {
+			stored.put(table.getItem(i).getText(0), new ArrayList<>());
+			stored.get(table.getItem(i).getText(0)).add(new SimpleBinding(table.getItem(i).getText(1)));
+			stored.get(table.getItem(i).getText(0)).add(new SimpleBinding(table.getItem(i).getText(2)));
+		}
+		
+		for (TableItem item: extraTable.getItems()) {
+			stored.get(item.getText(0)).add(new ExtraTypeBinding(item.getText(1), item.getText(2)));
+		}
+		
+		for (Entry<String, List<IBinding>> entry: stored.entrySet()) {
+			pp.setBinding(entry.getKey(),  entry.getValue().toArray(new IBinding[entry.getValue().size()]));
 		}
 	}
 
 	@Override
 	public void store() {
 		doStore();
-		XCorePropertyStore pp = (XCorePropertyStore) getPreferenceStore();
-		pp.doSave(toRemoveName);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
 
+import com.salexandru.xcore.preferencepage.ExtraTypeBinding;
 import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class XMetaModelEntityGenerator {
@@ -14,6 +15,7 @@ public class XMetaModelEntityGenerator {
 	private List<XPropertyComputerGenerator> computers_;
 	private List<XRelationBuilder> groupBuilders_;
 	private List<XActionPreformerGenerator> actionPerformers_;
+	private List<ExtraTypeBinding> extraMetaTypes_;
 	
 	private String underlyingType_;
 	private String extendedMetaType;
@@ -29,6 +31,7 @@ public class XMetaModelEntityGenerator {
 		computers_ = new ArrayList<>();
 		groupBuilders_ = new ArrayList<>();
 		actionPerformers_ = new ArrayList<>();
+		extraMetaTypes_ = new ArrayList<>();
 		this.entity_package = entity_package;
 		this.impl_package = impl_package;
 	}
@@ -64,9 +67,16 @@ public class XMetaModelEntityGenerator {
 	public void setUnderlyingMetaType(String type) {
 		underlyingType_ = type;
 	}
-
+	
+	public void addExtraMetaType(List<ExtraTypeBinding> bindings) {
+		extraMetaTypes_.addAll(bindings);
+	}
+	
 	public void setExtendedMetaType(String type) {
-		extendedMetaType = type;
+		if (null != type) {
+			extendedMetaType = type;
+		}
+		else extendedMetaType = XEntity.class.getCanonicalName();
 	}
 
 	public String getExtendedMetaType() {
@@ -76,6 +86,7 @@ public class XMetaModelEntityGenerator {
 	public List<XRelationBuilder> getBuilders() {return groupBuilders_;}
 	
 	public String generateImpl() {
+		underlyingType_ = underlyingType_.trim();
 		boolean isExtension = this.isExtension();
 		
 		StringBuilder s = new StringBuilder();
@@ -134,6 +145,37 @@ public class XMetaModelEntityGenerator {
 		s.append("        return underlyingObj_;\n");
 		s.append("    }\n");
 		
+		for (ExtraTypeBinding binding: extraMetaTypes_) {
+			final String extraType = binding.getType().trim();
+			final String transformer = binding.getTransformer().trim();
+			final String value = extraType.substring(extraType.lastIndexOf(".") + 1);
+			final String pattern = String.format("final com.salexandru.xcore.utils.interfaces.ITransform<%s, %s> ", underlyingType_, extraType);
+			final String returnType = String.format("com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>", underlyingType_, extraType);
+			
+			s.append("    public " + returnType +" transformOriginalTo_" + value + " () {\n");
+			s.append("    	  final " + underlyingType_ + " obj = underlyingObj_;\n" );
+			s.append(String.format("        return new com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>() {\n", underlyingType_, extraType));
+			s.append(String.format("        		private %s transformer = new %s();\n", pattern, transformer));
+			s.append("        		@Override\n");
+			s.append("        		public " + extraType + " transform() { return transformer.transform(obj); }\n"  );
+			s.append("        		@Override\n");
+			s.append("        		public " + underlyingType_ + " reverse() { return obj; }\n"  );
+			s.append("    	  };\n");
+			s.append("    }\n");
+			
+			s.append("    public " + returnType +" transformOriginalTo_" + value + " (" + pattern + " transform) {\n");
+			s.append("    	  final " + underlyingType_ + " obj = underlyingObj_;\n" );
+			s.append(String.format("        return new com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>() {\n", underlyingType_, extraType));
+			s.append("        		@Override\n");
+			s.append("        		public " + extraType + " transform() { return transform.transform(obj); }\n"  );
+			s.append("        		@Override\n");
+			s.append("        		public " + underlyingType_ + " reverse() { return obj; }\n"  );
+			s.append("    	  };\n");
+			s.append("    }\n");
+			
+		}
+		
+		
 		for (XPropertyComputerGenerator computer: computers_) {
 			s.append("@Override\n");
 			s.append(computer.generateImpl(computer.getName() + "_INSTANCE"));
@@ -187,6 +229,17 @@ public class XMetaModelEntityGenerator {
 			s.append("\n");
 		}
 		s.append("\t" + underlyingType_ + " getUnderlyingObject();\n");
+		
+		for (ExtraTypeBinding binding: extraMetaTypes_) {
+			String type = binding.getType().trim();
+			String value = type.substring(type.lastIndexOf(".") + 1);
+			String pattern = String.format("final com.salexandru.xcore.utils.interfaces.ITransform<%s, %s> transform", underlyingType_, type);
+			String returnType = String.format("com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>", underlyingType_, type);
+			
+			s.append("     " + returnType +" transformOriginalTo_" + value + " ();\n");
+			s.append("     " + returnType +" transformOriginalTo_" + value + " (" + pattern + ");\n");
+		}
+		
 		s.append("}\n");
 		return s.toString();
 	}
@@ -194,7 +247,7 @@ public class XMetaModelEntityGenerator {
 	private String getSimpleName(String name) {return name.substring(name.lastIndexOf('.') + 1);}
 
 	public boolean isExtension() {
-		return !extendedMetaType.equals(XEntity.class.getCanonicalName());
+		return null != extendedMetaType && !extendedMetaType.equals(XEntity.class.getCanonicalName());
 	}
 
 	public void addActionPerformer(XActionPreformerGenerator gen) {
