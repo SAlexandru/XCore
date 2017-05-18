@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.lang.model.type.TypeMirror;
 
+import com.salexandru.xcore.preferencepage.ExtraTypeBinding;
 import com.salexandru.xcore.utils.interfaces.XEntity;
 
 public class XCodeGenerator {
@@ -106,6 +107,18 @@ public class XCodeGenerator {
 			out.write("        }\n");
 			out.write("        return (" + pc.getName() +")instance;\n");
 			out.write("    }\n");
+			
+			for (ExtraTypeBinding binding: pc.getExtraMetaTypes()) {
+				out.write(String.format("   public %1$s create%1$s(%2$s obj2) {\n", pc.getName(), binding.getType()));
+				out.write(String.format("       %s obj = new %s().reverse(obj2);\n", pc.getUnderlyingType(), binding.getTransformer()));
+				out.write("       XEntity instance = lruCache_.get(obj);\n");
+				out.write("        if (null == instance) {\n");
+				out.write("           instance = new " + pc.getNameImpl() + "(obj);\n");
+				out.write("           lruCache_.put(obj, instance);\n");
+				out.write("        }\n");
+				out.write("        return (" + pc.getName() +")instance;\n");
+				out.write("    }\n");
+			}
 		}
 		out.write("}\n");
 		out.flush();

@@ -21,4 +21,10 @@ public class SimpleTransform2 implements ITransform<IType, IMethod> {
 		}
 	}
 
+	@Override
+	public IType reverse(IMethod newObj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -15,4 +15,10 @@ public class SimpleTransform1 implements ITransform<IMethod, IType> {
 		return arg0.getDeclaringType();
 	}
 
+	@Override
+	public IMethod reverse(IType newObj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

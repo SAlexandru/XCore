@@ -1,6 +1,7 @@
 package com.salexandru.codeGeneration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
@@ -42,6 +43,10 @@ public class XMetaModelEntityGenerator {
 	
 	public String getNameImpl() {
 		return getName() + "Impl";
+	}
+	
+	public List<ExtraTypeBinding> getExtraMetaTypes() {
+		return Collections.unmodifiableList(extraMetaTypes_);
 	}
 
 	public String getQualifiedName() {
@@ -129,6 +134,13 @@ public class XMetaModelEntityGenerator {
 			s.append(String.format("    private static final %1$s %1$s_INSTANCE = new %1$s();\n", act.getName()));
 		}
 		
+		for (ExtraTypeBinding binding: extraMetaTypes_) {
+			final String extraType = binding.getType().trim();
+			final String value = extraType.substring(extraType.lastIndexOf(".") + 1).trim();
+			final String returnType = String.format("com.salexandru.xcore.utils.interfaces.ITransform<%s, %s> ", underlyingType_, extraType);
+			s.append(String.format("    private static final %s TRANSFORMER_TO_%s = new %s();\n", returnType, value, binding.getTransformer().trim()));
+		}
+		
 		
 		
 		s.append("\n\n");
@@ -147,32 +159,21 @@ public class XMetaModelEntityGenerator {
 		
 		for (ExtraTypeBinding binding: extraMetaTypes_) {
 			final String extraType = binding.getType().trim();
-			final String transformer = binding.getTransformer().trim();
-			final String value = extraType.substring(extraType.lastIndexOf(".") + 1);
-			final String pattern = String.format("final com.salexandru.xcore.utils.interfaces.ITransform<%s, %s> ", underlyingType_, extraType);
-			final String returnType = String.format("com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>", underlyingType_, extraType);
+			final String value = extraType.substring(extraType.lastIndexOf(".") + 1).trim();
+			final String returnType = String.format("com.salexandru.xcore.utils.interfaces.UnderlyingPair<%s, %s, %s>", getName(), underlyingType_, extraType);
+			final String transform = String.format("com.salexandru.xcore.utils.interfaces.ITransform<%s, %s>", underlyingType_, extraType);
 			
 			s.append("    public " + returnType +" transformOriginalTo_" + value + " () {\n");
-			s.append("    	  final " + underlyingType_ + " obj = underlyingObj_;\n" );
-			s.append(String.format("        return new com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>() {\n", underlyingType_, extraType));
-			s.append(String.format("        		private %s transformer = new %s();\n", pattern, transformer));
-			s.append("        		@Override\n");
-			s.append("        		public " + extraType + " transform() { return transformer.transform(obj); }\n"  );
-			s.append("        		@Override\n");
-			s.append("        		public " + underlyingType_ + " reverse() { return obj; }\n"  );
-			s.append("    	  };\n");
+			s.append(String.format("        return new %s(TRANSFORMER_TO_%s.transform(underlyingObj_), underlyingObj_, TRANSFORMER_TO_%s);\n", returnType, value, value));
 			s.append("    }\n");
 			
-			s.append("    public " + returnType +" transformOriginalTo_" + value + " (" + pattern + " transform) {\n");
-			s.append("    	  final " + underlyingType_ + " obj = underlyingObj_;\n" );
-			s.append(String.format("        return new com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>() {\n", underlyingType_, extraType));
-			s.append("        		@Override\n");
-			s.append("        		public " + extraType + " transform() { return transform.transform(obj); }\n"  );
-			s.append("        		@Override\n");
-			s.append("        		public " + underlyingType_ + " reverse() { return obj; }\n"  );
-			s.append("    	  };\n");
+			s.append("    public " + returnType +" transformOriginalTo_" + value + " (" + transform + " transformer) {\n");
+			s.append(String.format("        return new %s(transformer.transform(underlyingObj_), underlyingObj_, transformer);\n", returnType));
 			s.append("    }\n");
 			
+			s.append(String.format("    public " + extraType +" as%s() {\n", value));
+			s.append(String.format("        return TRANSFORMER_TO_%s.transform(underlyingObj_);\n", value, extraType));
+			s.append("    }\n");
 		}
 		
 		
@@ -234,8 +235,9 @@ public class XMetaModelEntityGenerator {
 			String type = binding.getType().trim();
 			String value = type.substring(type.lastIndexOf(".") + 1);
 			String pattern = String.format("final com.salexandru.xcore.utils.interfaces.ITransform<%s, %s> transform", underlyingType_, type);
-			String returnType = String.format("com.salexandru.xcore.utils.interfaces.IReversableTransform<%s, %s>", underlyingType_, type);
+			String returnType = String.format("com.salexandru.xcore.utils.interfaces.UnderlyingPair<%s, %s, %s>", getName(), underlyingType_, type);
 			
+			s.append("     " + type +" as" + value + " ();\n");
 			s.append("     " + returnType +" transformOriginalTo_" + value + " ();\n");
 			s.append("     " + returnType +" transformOriginalTo_" + value + " (" + pattern + ");\n");
 		}
