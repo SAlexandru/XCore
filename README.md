@@ -1,5 +1,5 @@
 # XCore
-###A Tool for the Development of Program Analysis Tools
+### A Tool for the Development of Program Analysis Tools
 
 Copyright and license
 
