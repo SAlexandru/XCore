@@ -31,10 +31,10 @@ public class JdtMethodToWala implements ITransform<IMethod, MethodReference> {
 		
 		node.accept(finder);
 		
-		
 		final JDTIdentityMapper mapper = new JDTIdentityMapper(ClassLoaderReference.Primordial, node.getAST());
 	
 		 return mapper.getMethodRef(finder.getBinding());
+		
 	}
 
 	@Override

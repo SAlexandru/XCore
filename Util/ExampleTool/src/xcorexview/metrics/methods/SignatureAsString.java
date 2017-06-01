@@ -1,4 +1,4 @@
-package xcorexview.metrics.classes;
+package xcorexview.metrics.methods;
 
 import com.salexandru.xcore.utils.interfaces.IPropertyComputer;
 import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;

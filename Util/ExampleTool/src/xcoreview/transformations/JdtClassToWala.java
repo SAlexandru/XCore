@@ -2,11 +2,14 @@ package xcoreview.transformations;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import com.ibm.wala.cast.java.translator.jdt.JDTIdentityMapper;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeReference;
 import com.salexandru.xcore.utils.interfaces.ITransform;
 
@@ -22,9 +25,13 @@ public class JdtClassToWala implements ITransform<IType, TypeReference> {
 		parser.setProject(origObj.getJavaProject());
 		parser.setResolveBindings(true);
 		
-		parser.createAST(null).accept(finder);
+		final ASTNode node = parser.createAST(null);
+		
+		node.accept(finder);
+		
+		final JDTIdentityMapper mapper = new JDTIdentityMapper(ClassLoaderReference.Primordial, node.getAST());
 	
-		 return WalaInit.getWalaMapperFor(origObj.getJavaProject()).getTypeRef(finder.getBinding());
+		return mapper.getTypeRef(finder.getTypeBinding());
 	}
 
 	@Override
@@ -42,12 +49,7 @@ public class JdtClassToWala implements ITransform<IType, TypeReference> {
 			type_ = type;
 		}
 		
-		public ITypeBinding getBinding() {
-			if (type_ == null) {
-				throw new RuntimeException("Method Binding for " + type_.toString() + " wasn't find in the AST");
-			}
-			return typeBinding_;
-		}
+		public ITypeBinding getTypeBinding() { return typeBinding_; }
 		
 		@Override
 		public boolean visit(TypeDeclaration t) {
