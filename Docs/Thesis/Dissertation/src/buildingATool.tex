@@ -61,6 +61,7 @@ figures \ref{fig:enableSpecificSettings} and \ref{fig:modifySourceDir}.
 \section{Building the Analysises}
 
         After setting-up the project we continue implementing the analysis mentioned above. We will start implementing the simplest possible tool, which is the displaying the methond in the editor.
+        We will also show the new feature that have been developed.
 
 \subsection{Displaying a method in the editor}
        
@@ -71,7 +72,10 @@ After reading chapter \ref{ch:2} the code should be quite easy to read. We have 
         This feature of adding actions on entities has been introduced quite recently into the project. 
         When you first implement this class, you will most likely see that XClass cannot be imported because it doesn't exist yet.  It doesn't exist because we haven run the annotation processor 
 which will generate the code for the XClass entity. To invoke the processor, simply build the entire project. Once you have rebuild you can go to the source directory set in the first section of
-this chapter and inspect the code.
+this chapter and inspect the code. 
+
+        Please note that you should still get a compilation error on the line where you call the methond \code{getUnderlyingObject()}. This is because we haven't associated any back-end to our tool.
+For that please se the subsection \ref{subsection:backEnd}
 
 \small
 \begin{lstlisting}[language=Java,numbers=left]
@@ -103,6 +107,31 @@ return null;
 \normalsize{}\label{codeSelection:OpenInEditorAction}
 
 \subsection{Cyclomatic Complexity}
+
+        In this section we will continue to enrich our small analysis tool by adding a simple metric which is applied onto methods. \\
+        A property, as explained in the sections above, is nothing more that an analysis / processing that returns a value. The value isn't restricted to any
+specific type, it can be anything! \\
+        The metric that we will try to build is called the \textit{Cyclomatic Complexity} of a method. It requires us to compute the number of different paths
+that can be executed within the method. Take for example the method presented in \ref{codeSelection:cycloEg}. The cyclomatic complexity is 3. We have one path
+then goes through the \textit{then} branch, one that goes through the \textit{else} branch and doesn't enter the while loop and one that goes through the \textit{else}
+branch and enters the while loop. 
+
+\small
+\begin{lstlisting}[language=Java,numbers=left]
+ int method (int x) {
+    if (x % 2) return 1;
+    else {
+        while (x % 2 == 0) x /= 2;
+        return x;
+    }
+ }
+\end{lstlisting}
+\normalsize{}\label{codeSelection:cycloEg}
+
+        The code for implementing it cyclomatic complexity property can be found below in \ref{codeSelection:cyclomaticComplexity}.
+It should be quite strait forward to read. We take the AST of a the methond in question and for each statement: \code{if}, \code{else}
+\code{case}, \code{default}, \code{for}, \code{while}, \code{do \{\} while}, \code{try}, \code{catch}, \code{finally} we increase the 
+cyclomatic complexity.
 
 \small
 \begin{lstlisting}[language=Java, numbers=left]
@@ -176,7 +205,6 @@ public boolean visit(InfixExpression node) {
     return true;
 }
 
-
 @Override
 public boolean visit(WhileStatement node) {
     ++count;
@@ -218,6 +246,43 @@ public int getCount() {return count + 1;}
 }
 \end{lstlisting}
 \normalsize{}\label{codeSelection:cyclomaticComplexity}
+
+\subsection{Associate A Backend}\label{subsection:backEnd}
+        
+        Currently we have implemented a property and an action. Both shouldn't compile as we have not associated any back-end.
+As mentioned in the previous chapters XCore is dealing with high-level entities, we do not provide a back-end for extracting the entities from the source
+code. But we do provide a way of integrated the tools you build with a real back-end. 
+        
+        To do this, simply go to \textit{Project Properties/XCore} and you will see a table just like in figure \ref{fig:xcoreTable} , just look at the first one for now ! Select 
+XMethod hit the edit button. You should see a search bar where you should be able to write the corresponding the entity name from JDT, it's \textit{IMethod}, see figure \ref{fig:IMethod} and hit enter. Do the
+same thing for XClass and the table should look like \ref{fig:xcoreTableFull}. Now if you recompile everything it should compile.
+
+        What we have done here is associated every meta-model entity with an corresponding entity from the Eclipse JDT back-end. This will help us greatly in implementing more analysis tools. Of course, we 
+are not restricted to mapping them directly to a JDT entity, you could have provided your own implementation of the \textit{IMethod} if you wished.
+
+        \begin{figure}
+             \centering
+             \scalebox{0.3}{\includegraphics{../img/tutorial/xcoreTable.png}}
+             \caption{XCore Project Configuration}
+             \label{fig:xcoreTable}
+        \end{figure}    
+
+        \begin{figure}
+             \centering
+             \scalebox{0.3}{\includegraphics{../img/tutorial/iMethond.png}}
+             \caption{XCore Search Type Widget}
+             \label{fig:IMethond}
+        \end{figure}    
+
+        \begin{figure}
+             \centering
+             \scalebox{0.3}{\includegraphics{../img/tutorial/xcoreTableFull.png}}
+             \caption{XCore Project Configuration}
+             \label{fig:xcoreTableFull}
+        \end{figure}    
+
+
+       
 
 \subsection{Number of calls to the method}
 
