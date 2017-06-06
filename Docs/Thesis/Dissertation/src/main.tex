@@ -18,6 +18,16 @@
 \PrerenderUnicode{ăîșțâĂÎÂȘȚ„”}
 \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 %\usepackage{showframe}
+\usepackage{placeins}
+
+\let\Oldsection\section
+\renewcommand{\section}{\FloatBarrier\Oldsection}
+
+\let\Oldsubsection\subsection
+\renewcommand{\subsection}{\FloatBarrier\Oldsubsection}
+
+\let\Oldsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\FloatBarrier\Oldsubsubsection}
 
 \usepackage[T1]{fontenc}
 \usepackage{inconsolata}
@@ -76,6 +86,7 @@
 \input{introduction}
 \input{xcoreApproach}
 \input{buildingATool}
+\input{conclusions}
 
 \listoffigures
 \listoftables

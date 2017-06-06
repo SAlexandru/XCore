@@ -269,9 +269,9 @@ are not restricted to mapping them directly to a JDT entity, you could have prov
 
         \begin{figure}
              \centering
-             \scalebox{0.3}{\includegraphics{../img/tutorial/iMethond.png}}
+             \scalebox{0.3}{\includegraphics{../img/tutorial/IMethod.png}}
              \caption{XCore Search Type Widget}
-             \label{fig:IMethond}
+             \label{fig:IMethod}
         \end{figure}    
 
         \begin{figure}
@@ -281,9 +281,149 @@ are not restricted to mapping them directly to a JDT entity, you could have prov
              \label{fig:xcoreTableFull}
         \end{figure}    
 
-
-       
-
 \subsection{Number of calls to the method}
 
-\subsection{Even more}
+        For the last metric that we want to implement, we will want to computer the number of times this method is called from within the project. For this we need to build want is known
+as the Control Flow Graph of the project. "A control flow graph (CFG) in computer science is a representation, using graph notation, of all paths that might be traversed through a program during its execution. The control flow graph is due to Frances E. Allen, who notes that Reese T. Prosser used boolean connectivity matrices for flow analysis before." \cite{wiki:CFG}
+
+        This is quite hard to using only the Eclipse JDT infrastructure because it will imply to building it from scratch. Simply writing our algorithm for building the CFG of the code is tidious and wrong as we would go about reinventing the wheel. 
+What we will due is use another back-end called WALA. 
+        
+        With XCore, now, we can add multiple back-end to it, not just one. We have implemented this new feature for easier integration with multiple tools that use quite different back-ends. \\
+        In order to integrate with another back-end we first have to add the necessary dependencies and implement a transformer from the original entity, i.e JDT IMethod in our case, to, in our case, WALA IMethod.
+A transformer is simply to implement. We have to impelment the \code{ITransform <OriginalUnderlyingType, NewUnderlyingType>}. An example of the implementation that transforms JDT IMethod to WALA IMethod can be found in the code section below
+\ref{codeSelection:IMethodTransformer}
+
+\small
+\begin{lstlisting}[language=Java,numbers=left]
+class JdtMethodToWala implements ITransform<IMethod, MethodReference> {
+@Override
+public MethodReference transform(IMethod origObj) {
+final ASTParser parser = ASTParser.newParser(AST.JLS8);
+final MethodBindingFinder finder = new MethodBindingFinder(origObj);
+
+parser.setSource(origObj.getCompilationUnit());
+parser.setKind(ASTParser.K_COMPILATION_UNIT);
+parser.setProject(origObj.getJavaProject());
+parser.setResolveBindings(true);
+
+final ASTNode node = parser.createAST(null);
+
+node.accept(finder);
+
+final JDTIdentityMapper mapper = new JDTIdentityMapper(ClassLoaderReference.Primordial, node.getAST());
+
+ return mapper.getMethodRef(finder.getBinding());
+
+}
+
+@Override
+public IMethod reverse(MethodReference newObj) {
+return null;
+}
+
+
+private static final class MethodBindingFinder extends ASTVisitor {
+private IMethod method_;
+private IMethodBinding methodBinding_ = null;
+
+public MethodBindingFinder (IMethod method) {
+    if (null == method) {
+        throw new IllegalArgumentException("MethodBindingFinder was given to find a null method ...");
+    }
+    
+    method_ = method;
+}
+
+public IMethodBinding getBinding() {
+    if (methodBinding_ == null) {
+        throw new RuntimeException("Method Binding for " + method_.toString() + " wasn't found in the AST");
+    }
+    return methodBinding_;
+}
+
+@Override
+public void endVisit(MethodDeclaration m) {
+    if (methodBinding_ == null && m.getName().toString().equals(method_.getElementName())) {
+        methodBinding_ = m.resolveBinding();
+    }
+}
+
+@Override
+public boolean visit(MethodDeclaration m) {
+    if (methodBinding_ == null && m.getName().toString().equals(method_.getElementName())) {
+        methodBinding_ = m.resolveBinding();
+    }
+    
+    return true;
+}
+
+@Override
+public void endVisit(MethodInvocation m) {
+    if (methodBinding_ == null && m.getName().toString().equals(method_.getElementName())) {
+        methodBinding_ = m.resolveMethodBinding();
+    }
+}
+
+@Override
+public boolean visit(MethodInvocation m) {
+    if (methodBinding_ == null && m.getName().toString().equals(method_.getElementName())) {
+        methodBinding_ = m.resolveMethodBinding();
+    }
+    
+    return true;
+}
+}
+}
+\end{lstlisting}
+\normalsize{}\label{codeSelection:IMethodTransformer}
+
+        After we have the transformer we can now go back to the \textit{Project Properties / XCore } and edit the second table (this is why the second table exists, add more elements to the backend). 
+It is similar to what we have done before but now we have to add the transformer too, not only the type. Figure \ref{fig:multipleEntities} shows you an example.
+
+       \begin{figure}[!htb]
+             \centering
+             \scalebox{0.3}{\includegraphics{../img/tutorial/multipleEntities.png}}
+             \caption{Adding another back-end to XCore}
+             \label{fig:multipleEntities}
+        \end{figure}    
+
+        Now that we have everything ready in place we can write the code for this highly complex metric. The code from the section below \ref{codeSelection:cfgFinal} should now be easy to understand!
+
+\small
+\begin{lstlisting}[language=Java,numbers=left]
+@PropertyComputer
+public class SomethingAboutCG implements IPropertyComputer<Integer, XMethod> {
+
+	@Override
+	public Integer compute(XMethod entity) {
+		IJavaProject p = entity.getUnderlyingObject().getJavaProject();
+		try {
+			JavaEclipseProjectPath path = JavaEclipseProjectPath.make(p, AnalysisScopeType.SOURCE_FOR_PROJ_AND_LINKED_PROJS);
+			AnalysisScope scope = path.toAnalysisScope(new JavaSourceAnalysisScope());
+			scope.setExclusions(null);
+			JDTClassLoaderFactory factory = new JDTClassLoaderFactory(scope.getExclusions());
+		
+		
+			ClassHierarchy cha = ClassHierarchyFactory.make(scope,factory);
+			
+		
+			
+			Iterable<Entrypoint> entryPoints = Util.makeMainEntrypoints(scope, cha);
+			AnalysisOptions opts = new AnalysisOptions(scope, entryPoints);
+			AnalysisCache cache = new AnalysisCache(null, null, null);
+			SSAPropagationCallGraphBuilder cgBuilder = Util.makeZeroCFABuilder(opts, cache, cha, scope);
+			CallGraph cg = cgBuilder.makeCallGraph(opts, null);
+			
+			return cg.getNodes(entity.asMethodReference()).size();
+		} catch (IllegalArgumentException | CallGraphBuilderCancelException | IOException | CoreException | ClassHierarchyException e) {
+			e.printStackTrace();
+			
+			return null;
+			//throw new RuntimeException(e);
+		} 
+	}
+
+}
+\end{lstlisting}
+\normalsize{}\label{codeSelection:cfgFinal}
