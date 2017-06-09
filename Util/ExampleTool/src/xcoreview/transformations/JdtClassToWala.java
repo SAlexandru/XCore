@@ -29,7 +29,7 @@ public class JdtClassToWala implements ITransform<IType, TypeReference> {
 		
 		node.accept(finder);
 		
-		final JDTIdentityMapper mapper = new JDTIdentityMapper(ClassLoaderReference.Primordial, node.getAST());
+		final JDTIdentityMapper mapper = new JDTIdentityMapper(ClassLoaderReference.Application, node.getAST());
 	
 		return mapper.getTypeRef(finder.getTypeBinding());
 	}

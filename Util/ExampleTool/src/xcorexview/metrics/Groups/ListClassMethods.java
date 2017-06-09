@@ -2,6 +2,7 @@ package xcorexview.metrics.Groups;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import com.salexandru.xcore.utils.interfaces.Group;
 import com.salexandru.xcore.utils.interfaces.IRelationBuilder;
@@ -24,6 +25,7 @@ public class ListClassMethods implements IRelationBuilder<XMethod, XClass> {
 		Group<XMethod> group_ = new Group<>();
 		try {
 			for (final IMethod method: entity.getUnderlyingObject().getMethods()) {
+			   if (Modifier.isStatic(method.getFlags()))
 					group_.add(Factory.getInstance().createXMethod(method));
 			}
 		} catch (JavaModelException e) {
