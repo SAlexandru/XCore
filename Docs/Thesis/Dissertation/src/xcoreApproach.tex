@@ -249,5 +249,12 @@ what we need and may want to integrate with another back-end to complement it. W
 of the developer to provide this element. Once provided our tool can generate similar method to \code{getUnderlyingObject} which allow the developers to switch from one representation to another.
 
 \subsection{Tool extension}
+
+	This feature has a nice analogy in Object Oriented Programming, i.e Inheritence. We have base-tool which a sub-tool that we have implemented will extend. 
+
+	This is done so we can improve the functionality of the base-tool and also be able to add new features to it, without breaking the original developed tool. It works by copying the 
+entire base-tool project into the sub-tool project. This ensures that we have all the needed dependencies. After we have copied the code, we have to make sure that the entities have the 
+appropriate concrete type mapped. This is done by adding, yet another concept, \textit{extended underlying type}. This is set during this process and cannot be altered. Also, once this
+type is set we cannot change the underlying object.
         
 
