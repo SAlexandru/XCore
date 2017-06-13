@@ -1,6 +1,8 @@
 \chapter{Conclusions}\label{conclusions}
 
-        As mentioned from the begining our goal when building XCore was to create a tool / framework
+\section{Summary}
+
+        As mentioned from the begining, our goal when building XCore was to create a tool / framework
 for easily building extensible analysis tools without sacrificing any of the type safety properties
 of the language. 
 
@@ -9,9 +11,9 @@ extensible, in order to adapt easily to changes that might come in the future. U
 of building a meta-model, is problematic, not only for its sheer complexity, but also for the fact that 
 it makes it very hard, if not impossible to integrated different analysis tools together. 
 
-        One tool, that we presented in the introduction and in \cite{oldThesis} is CodeProd. It has tried
+        One tool, that we presented in the introduction and in \cite{oldThesis} is CodePro. It has tried
 building a complex meta-model and to ensure extensibility it has sacrificed type safety. One consequence is
-that there was no way to ensure what type of entity can be analysed by a metric. Everyone received an entity
+that there was no way to staticly ensure what type of entity can be analysed by a given metric. Everyone received an entity
 as type \code{Object}. Basically it has transformed a type safety language into a dynamic language. 
 
         Our solution is to automate the process of creation of the meta-model. We have developed a meta-meta-model
@@ -24,14 +26,10 @@ to also be provided. One important aspect, all of this happens at compile time !
 XCore type safe which we also enforce on the analysis tools. 
 
         For the porpouse of the evaluation we have previously created a tool caled \code{XCoreView}. It's basically an Eclise Widget which 
-every XCore tool can hook up an use. It is based on the work done on \code{InsiderView} from CodePro.
+every XCore tool can hook up an use. It is based on the work done on \code{InsiderView} from CodePro \cite{tools:inCode}.
 
 \section{Future Work}
 
-        We initially started building XCore to solve the problem of building static typed analysis tools \cite{oldThesis}. We have continued
-to improve the tool to make it even more appealing to the developers by adding the concept of actions upon entities, marker interface in order
-to indentify, in a type safe maner, what kind of metrics we are using and also the ability to add multiple back-ends to our tool.
-        
         We are currently working on providing a sandbox system for adding / integrating other tools into the our main / core tool that we have build. 
-This provides a nice way for a team of developers to work togheter and integrate which other without too many problems. Also it will provide the ability
+This provides a nice way for a team of developers to work togheter and integrate with other without too many problems. Also it will provide the ability
 to isolate componentst that do not work together. 

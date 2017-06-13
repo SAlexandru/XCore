@@ -17,12 +17,12 @@ In the current chapter we will build an analysis tool which is capable of:
 or download it directly as a zip from \href{https://github.com/SAlexandru/XCore/archive/master.zip}{here}. After you have downloaded the repository go to the XCore/deploy/plugings folder
 and copy ther XCore jar into the Eclipse instalation folder called \textit{dropins}. At the time of writing this document we are at version 1.2.0 and the jar is called \textit{XCore\_1.2.0.jar}. 
 
-        For the scope of this article please create a new Eclipse workspace and import from the XCore repository the \textit{Util/XCoreView} (a.k.a Insider View) project. This is a nice ui we have
+        For the scope of this thesis please create a new Eclipse workspace and import from the XCore repository the \textit{Util/XCoreView} (a.k.a Insider View) project. This is a nice ui we have
 build in order to test tools build with XCore.
 
         Now, in the new workspace, create a Plug-in Project. In this project create a lib folder and copy the jar that you find in \textit{XCore/deploy/lib/XCoreInterface\_<version>.jar}. Current version 
-for this jar is 1.1.0. After this we have to add the library to the dependecy path using \textit{Project Properties / Java Build Path / Libraries} as can be seen in figure \ref{fig:addJar}. We
-also have to make the jar available at runtime from \textit{MANIFEST.MF/Runtime/Classpath} as can be seen in figure \ref{fig:makeAvailable}. 
+for this jar is 1.1.0. After this we have to add the library to the dependecy path using \textit{Project Properties / Java Build Path / Libraries} as can be seen in Figure \ref{fig:addJar}. We
+also have to make the jar available at runtime from \textit{MANIFEST.MF/Runtime/Classpath} as can be seen in Figure \ref{fig:makeAvailable}. 
 
        \begin{figure}
              \centering
@@ -41,7 +41,7 @@ also have to make the jar available at runtime from \textit{MANIFEST.MF/Runtime/
 
         After this we should enable the annotation processor. This is done by accessing \textit{Project Properties/Java Compiler/Annotation Processing/Factory Path} and ticking the \textit{Enable Specific Settings}.
 Also, for clarity we can make the generate content easily accessable by modifing the path from \textit{Project Properties/Java Compiler/Annotation Processing}. Each step is ilustrated in 
-figures \ref{fig:enableSpecificSettings} and \ref{fig:modifySourceDir}.
+Figures \ref{fig:enableSpecificSettings} and \ref{fig:modifySourceDir}.
 
          \begin{figure}
              \centering
@@ -58,19 +58,19 @@ figures \ref{fig:enableSpecificSettings} and \ref{fig:modifySourceDir}.
         \end{figure}    
 
 
-\section{Building the Analysises}
+\section{Building the Analyses}
 
         After setting-up the project we continue implementing the analysis mentioned above. We will start implementing the simplest possible tool, which is the displaying the methond in the editor.
         We will also show the new feature that have been developed.
 
 \subsection{Displaying a method in the editor}
        
-        First create a class called \code{OpenInEditorAction}. The code for this class is presented in the section \ref{codeSelection:OpenInEditorAction}.
+        First create a class called \code{OpenInEditorAction}. The code for this class is presented in the Section \ref{codeSelection:OpenInEditorAction}.
 After reading chapter \ref{ch:2} the code should be quite easy to read. We have defined an action class, this can be easily seen by presence of the annotation
 \code{@ActionPreformer} and its coressponding interface \code{IActionPerformer<Void, XClass, HListEmpty>}. 
        
         This feature of adding actions on entities has been introduced quite recently into the project. 
-        When you first implement this class, you will most likely see that XClass cannot be imported because it doesn't exist yet.  It doesn't exist because we haven run the annotation processor 
+        When you first implement this class, you will most likely see that XClass cannot be imported because it does not exist yet.  It doesn't exist because we haven run the annotation processor 
 which will generate the code for the XClass entity. To invoke the processor, simply build the entire project. Once you have rebuild you can go to the source directory set in the first section of
 this chapter and inspect the code. 
 
@@ -253,8 +253,8 @@ public int getCount() {return count + 1;}
 As mentioned in the previous chapters XCore is dealing with high-level entities, we do not provide a back-end for extracting the entities from the source
 code. But we do provide a way of integrated the tools you build with a real back-end. 
         
-        To do this, simply go to \textit{Project Properties/XCore} and you will see a table just like in figure \ref{fig:xcoreTable} , just look at the first one for now ! Select 
-XMethod hit the edit button. You should see a search bar where you should be able to write the corresponding the entity name from JDT, it's \textit{IMethod}, see figure \ref{fig:IMethod} and hit enter. Do the
+        To do this, simply go to \textit{Project Properties/XCore} and you will see a table just like in Figure \ref{fig:xcoreTable} , just look at the first one for now ! Select 
+XMethod hit the edit button. You should see a search bar where you should be able to write the corresponding the entity name from JDT, it's \textit{IMethod}, see Figure \ref{fig:IMethod} and hit enter. Do the
 same thing for XClass and the table should look like \ref{fig:xcoreTableFull}. Now if you recompile everything it should compile.
 
         What we have done here is associated every meta-model entity with an corresponding entity from the Eclipse JDT back-end. This will help us greatly in implementing more analysis tools. Of course, we 
@@ -284,14 +284,16 @@ are not restricted to mapping them directly to a JDT entity, you could have prov
 \subsection{Number of calls to the method}
 
         For the last metric that we want to implement, we will want to computer the number of times this method is called from within the project. For this we need to build want is known
-as the Control Flow Graph of the project. "A control flow graph (CFG) in computer science is a representation, using graph notation, of all paths that might be traversed through a program during its execution. The control flow graph is due to Frances E. Allen, who notes that Reese T. Prosser used boolean connectivity matrices for flow analysis before." \cite{wiki:CFG}
+as the call graph. "A call graph (also known as a call multigraph) is a control flow graph, which represents calling relationships between subroutines in a computer program. Each node represents a procedure and each edge (f, g) indicates that procedure f calls procedure g. Thus, a cycle in the graph indicates recursive procedure calls." \cite{wiki:CG}
 
         This is quite hard to using only the Eclipse JDT infrastructure because it will imply to building it from scratch. Simply writing our algorithm for building the CFG of the code is tidious and wrong as we would go about reinventing the wheel. 
 What we will due is use another back-end called WALA. 
         
-        With XCore, now, we can add multiple back-end to it, not just one. We have implemented this new feature for easier integration with multiple tools that use quite different back-ends. \\
+        With XCore, now, we can add multiple back-end to it, not just one. We have implemented this new feature for easier integration with multiple tools that use quite different back-ends. 
+
         In order to integrate with another back-end we first have to add the necessary dependencies and implement a transformer from the original entity, i.e JDT IMethod in our case, to, in our case, WALA IMethod.
-A transformer is simply to implement. We have to impelment the \code{ITransform <OriginalUnderlyingType, NewUnderlyingType>}. An example of the implementation that transforms JDT IMethod to WALA IMethod can be found in the code section below
+A transformer is simply to implement. We have to impelment the \code{ITransform <OriginalUnderlyingType, NewUnderlyingType>}. The transformer has to functions that need to be implemented, a transformation from the original entity to 
+the new entity and the reverse transformation. In case of WALA the transformation is implemented by using the AST of the class and retrieving the appropriate method. An example of the implementation that transforms JDT IMethod to WALA IMethod can be found in the code below
 \ref{codeSelection:IMethodTransformer}
 
 \small
