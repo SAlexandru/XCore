@@ -33,7 +33,7 @@ import com.salexandru.xcore.utils.metaAnnotation.PropertyComputer;
 import exampletool.metamodel.entity.XMethod;
 
 @PropertyComputer
-public class SomethingAboutCG implements IPropertyComputer<Integer, XMethod> {
+public class NumberOfCalls implements IPropertyComputer<Integer, XMethod> {
 
 	@Override
 	public Integer compute(XMethod entity) {
@@ -42,15 +42,11 @@ public class SomethingAboutCG implements IPropertyComputer<Integer, XMethod> {
 			JavaEclipseProjectPath path = JavaEclipseProjectPath.make(p, AnalysisScopeType.NO_SOURCE);
 			AnalysisScope scope = path.toAnalysisScope(new JavaSourceAnalysisScope());
 			SetOfClasses classes = new FileOfClasses(new FileInputStream("/Users/alexandrustefanica/Projects/XCore/Util/ExampleTool/resources/exclusions")); 
-
-
 			
 			scope.setExclusions(classes);
 			
-			
 			JDTClassLoaderFactory factory = new JDTClassLoaderFactory(scope.getExclusions());
 			
-		
 		
 			ClassHierarchy cha = ClassHierarchyFactory.make(scope, factory);
 			
