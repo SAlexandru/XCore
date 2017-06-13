@@ -134,9 +134,6 @@ public class CyclomaticComplexity implements IPropertyComputer<Integer, XMethod>
 			return true;
 		}
 			
-		
-		public int getCount() {return count + 1;}
-		
+		public int getCount() {return count + 1;}	
 	}
-
 }
