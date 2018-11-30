@@ -1,0 +1,2 @@
+bindings=XMethod,org.eclipse.jdt.core.IMethod,ro.lrg.xcore.metametamodel.XEntity;XClass,org.eclipse.jdt.core.IType,ro.lrg.xcore.metametamodel.XEntity;XField,org.eclipse.jdt.core.IField,ro.lrg.xcore.metametamodel.XEntity;XProject,org.eclipse.jdt.core.IJavaProject,ro.lrg.xcore.metametamodel.XEntity;XPackage,org.eclipse.jdt.core.IPackageFragment,ro.lrg.xcore.metametamodel.XEntity;
+eclipse.preferences.version=1
