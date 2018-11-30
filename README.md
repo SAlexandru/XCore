@@ -10,4 +10,4 @@ Code and documentation copyright 2015 Alexandru Stefanica. Code released under [
 
 #### Documentation
 
-Go to the [Wiki page](https://github.com/SAlexandru/XCore/wiki). A tutorial is available [here](https://github.com/SAlexandru/XCore/wiki/Tutorial-1-:-Basic-Usage) and a screencast is available [here](https://youtu.be/hS__IvbJeQk).
+Go to the [Wiki page](https://github.com/SAlexandru/XCore/wiki).
