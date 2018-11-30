@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+	   point="org.eclipse.jdt.apt.core.annotationProcessorFactory" >
+		<java6processors enableDefault="true">
+			<java6processor class="ro.lrg.xcore.annotationprocessor.XAnnotationProcessor"/>
+		</java6processors>
+	</extension>
+ <extension
+       point="org.eclipse.ui.propertyPages">
+    <page
+          class="ro.lrg.xcore.preferencepage.XCorexPropertyPage"
+          id="com.salexandru.xcore.XCorePropertyPage"
+          name="XCore"
+          objectClass="org.eclipse.jdt.core.IJavaProject">
+    </page>
+ </extension>
+</plugin>
