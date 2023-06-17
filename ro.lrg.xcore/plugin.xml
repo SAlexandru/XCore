@@ -12,8 +12,11 @@
     <page
           class="ro.lrg.xcore.preferencepage.XCorexPropertyPage"
           id="com.salexandru.xcore.XCorePropertyPage"
-          name="XCore"
-          objectClass="org.eclipse.jdt.core.IJavaProject">
+          name="XCore">
+       <enabledWhen>
+          <instanceof
+                value="org.eclipse.jdt.core.IJavaProject">
+          </instanceof></enabledWhen>
     </page>
  </extension>
 </plugin>

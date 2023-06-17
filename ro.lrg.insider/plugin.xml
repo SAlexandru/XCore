@@ -13,17 +13,32 @@
       </view>
    </extension>
    <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="false"
-            id="ro.lrg.insider.view.BrowseEntity"
-            objectClass="java.lang.Object">
-         <action
-               class="ro.lrg.insider.view.BrowseEntityAction"
-               id="ro.lrg.insider.view.BrowseEntityAction"
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?after=ValidationCommand">
+         <command
+               commandId="ro.lrg.insider.view.BrowseEntityAction"
+               icon="res/lrglogo.png"
                label="Browse in Insider"
-               menubarPath="addition">
-         </action>
-      </objectContribution>
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.eclipse.jdt.core.IJavaElement">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="ro.lrg.insider.view.BrowseEntityAction"
+            id="ro.lrg.insider.view.BrowseEntityAction"
+            name="Browse in Insider">
+      </command>
    </extension>
 </plugin>

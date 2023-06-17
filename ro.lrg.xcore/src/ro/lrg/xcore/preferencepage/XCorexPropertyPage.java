@@ -57,7 +57,7 @@ public class XCorexPropertyPage extends FieldEditorPreferencePage implements IWo
 				String[] allNames = super.preferenceNames();
 				String value = "";
 				for(String aName : allNames) {
-					value += aName + "," + super.getString(aName) + ";";
+					value += aName + ":" + super.getString(aName) + ";";
 				}
 				IScopeContext projectScope = new ProjectScope(prj.getProject());
 				IEclipsePreferences projectNode = projectScope.getNode(Activator.PLUGIN_ID);
@@ -74,7 +74,7 @@ public class XCorexPropertyPage extends FieldEditorPreferencePage implements IWo
 				String value = "";
 				for(String aName : allNames) {
 					if(!toRemove.contains(aName))
-						value+= aName + "," + super.getString(aName) + ";";
+						value+= aName + ":" + super.getString(aName) + ";";
 					
 				}
 				IScopeContext projectScope = new ProjectScope(prj.getProject());
@@ -93,30 +93,30 @@ public class XCorexPropertyPage extends FieldEditorPreferencePage implements IWo
 				if(value == null || value.equals("")) return;
 				String[] allEntries = value.split(";");
 				for(String anEntry : allEntries) {
-					String values[] = anEntry.split(",");
-					super.setValue(values[0],values[1] + "," + values[2]);
-					super.setDefault(values[0], Object.class.getCanonicalName() + "," + XEntity.class.getCanonicalName());
+					String values[] = anEntry.split(":");
+					super.setValue(values[0],values[1] + ":" + values[2]);
+					super.setDefault(values[0], Object.class.getCanonicalName() + ":" + XEntity.class.getCanonicalName());
 				}
 		}
 		
 		public void setBindings(String entity, String underlyingType, String upLinkType) {
-			super.setValue(entity, underlyingType + "," + upLinkType);
-			super.setDefault(entity, Object.class.getCanonicalName() + "," + XEntity.class.getCanonicalName());
+			super.setValue(entity, underlyingType + ":" + upLinkType);
+			super.setDefault(entity, Object.class.getCanonicalName() + ":" + XEntity.class.getCanonicalName());
 		}
 		
 		public void setDefaultBindings(String entity) {
-			super.setDefault(entity, Object.class.getCanonicalName() + "," + XEntity.class.getCanonicalName());
+			super.setDefault(entity, Object.class.getCanonicalName() + ":" + XEntity.class.getCanonicalName());
 			super.setToDefault(entity);
 		}
 		
 		public String getExtendedMetaType(String entity) {
 			String tmp = super.getString(entity);
-			return !tmp.equals("") ? tmp.substring(tmp.indexOf(",") + 1) : null;
+			return !tmp.equals("") ? tmp.substring(tmp.indexOf(":") + 1) : null;
 		}
 
 		public String getUnderlyingMetaType(String entity) {
 			String tmp = super.getString(entity);
-			return !tmp.equals("") ? tmp.substring(0,tmp.indexOf(",")) : null;
+			return !tmp.equals("") ? tmp.substring(0,tmp.indexOf(":")) : null;
 		}
 				
 		public String[][] toMatrix() {

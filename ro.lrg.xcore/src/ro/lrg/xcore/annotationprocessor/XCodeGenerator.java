@@ -116,8 +116,8 @@ public class XCodeGenerator {
 		Writer out = filer.createSourceFile(theBasePackage + ".factory.LRUCache").openWriter();		
 		out.write("package " + factory_package + ";\n\n");
 		out.write("import java.util.LinkedHashMap;\n");
-		out.write("import java.util.Map.Entry;\n\n");
 		out.write("public class LRUCache <K, V> extends LinkedHashMap <K, V> {\n");
+		out.write("   private static final long serialVersionUID = 1L;\n");
 		out.write("   private int capacity;\n");
 		out.write("   public LRUCache(int capacity) {\n");
 		out.write("       super(capacity+1, 1.0f, true);\n");
@@ -125,7 +125,7 @@ public class XCodeGenerator {
 		out.write("   }\n");
 		out.write("   public void setCapacity(int capacity) {this.capacity = capacity;}\n");
 		out.write("   @Override\n");
-		out.write("   protected boolean removeEldestEntry(Entry<K, V> entry) {\n");
+		out.write("   protected boolean removeEldestEntry(java.util.Map.Entry<K, V> entry) {\n");
 		out.write("       return (size() > this.capacity);\n");
 		out.write("   }\n");
 		out.write("}\n");

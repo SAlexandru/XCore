@@ -367,13 +367,6 @@ public class XCorexTableView extends ViewPart {
 		res.addAll(getAllEntities(unifiedEntity,null, propertyCheckerForAnnotation(ThisIsARelationBuilder.class)).keySet());
 		return res;
 	}
-
-	private Set<String> getEntityTools(XEntity anEntity) {
-		HashSet<String> res = new HashSet<>();		
-		res.addAll(getAllEntitiesAnnotatedWith(anEntity, propertyCheckerForAnnotation(ThisIsAProperty.class)).keySet());
-		res.addAll(getAllEntitiesAnnotatedWith(anEntity, propertyCheckerForAnnotation(ThisIsARelationBuilder.class)).keySet());
-		return res;
-	}
 	
 	private Set<Class<?>> getAllInterfaces(Class<?> aClass) {
 		HashSet<Class<?>> res = new HashSet<Class<?>>();
